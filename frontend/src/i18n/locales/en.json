@@ -1,0 +1,168 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About Us",
+    "services": "Services",
+    "projects": "Projects",
+    "blog": "Blog",
+    "contact": "Contact",
+    "login": "Login",
+    "register": "Register",
+    "pricing": "Pricing",
+    "dashboard": "Dashboard",
+    "appointment": "Make Appointment"
+  },
+  "topbar": {
+    "hours": "Mon - Tues : 6.00 am - 10.00 pm",
+    "address": "121 King St, Melbourne, Australia"
+  },
+  "hero": {
+    "title": "Professional Car Services",
+    "subtitle": "We provide the best car maintenance and repair services at competitive prices",
+    "button": "Book Your Appointment Now"
+  },
+  "about": {
+    "title": "About Us",
+    "subtitle": "More than 20 years of experience in car maintenance",
+    "description": "We are a team of engineers and technicians specialized in maintaining and repairing all types of cars. We provide high-quality services with the latest technologies and equipment.",
+    "experience": "Years of Experience",
+    "customers": "Satisfied Customers",
+    "projects": "Completed Projects",
+    "team": "Specialized Technicians",
+    "feature1": "Comprehensive maintenance services for all types of cars",
+    "feature2": "A team of specialized technicians",
+    "feature3": "The latest equipment and technologies",
+    "feature4": "Competitive prices and quality assurance",
+    "vision": "Our Vision",
+    "visionText": "To be the first choice in car maintenance and repair, and to provide high-quality services that meet our customers' needs.",
+    "mission": "Our Mission",
+    "missionText": "Providing car maintenance and repair services with the highest quality standards, using the latest technologies and equipment."
+  },
+  "services": {
+    "title": "Our Services",
+    "subtitle": "We provide a comprehensive range of car services",
+    "engine": "Engine Repair",
+    "transmission": "Transmission",
+    "brakes": "Brakes",
+    "tires": "Tires",
+    "battery": "Battery",
+    "diagnostic": "Diagnostic",
+    "oil": "Oil Change",
+    "ac": "Air Conditioning"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "We are here to help you",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "message": "Message",
+    "send": "Send Message",
+    "address": "Address",
+    "phoneNumber": "888 123-4587",
+    "emailAddress": "info@example.com",
+    "nameRequired": "Name is required",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email address",
+    "phoneRequired": "Phone number is required",
+    "messageRequired": "Message is required"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Latest news and tips about cars",
+    "readMore": "Read More",
+    "published": "Published on",
+    "author": "By",
+    "backToBlog": "Back to Blog",
+    "like": "Like",
+    "share": "Share",
+    "relatedPosts": "Related Posts",
+    "newsletter": "Subscribe to Newsletter",
+    "newsletterText": "Get the latest articles and tips directly in your email",
+    "emailPlaceholder": "Enter your email",
+    "subscribe": "Subscribe"
+  },
+  "pricing": {
+    "title": "Our Pricing",
+    "subtitle": "Competitive pricing plans for all services",
+    "basic": "Basic",
+    "premium": "Premium",
+    "deluxe": "Deluxe",
+    "monthly": "Monthly",
+    "choose": "Choose Plan"
+  },
+  "login": {
+    "title": "Login",
+    "email": "Email",
+    "password": "Password",
+    "login": "Login",
+    "forgot": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "register": "Register"
+  },
+  "register": {
+    "title": "Create New Account",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "register": "Create Account",
+    "hasAccount": "Already have an account?",
+    "login": "Login"
+  },
+  "appointment": {
+    "title": "Make Appointment",
+    "subtitle": "Book your appointment with us",
+    "service": "Service",
+    "date": "Date",
+    "time": "Time",
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "message": "Additional Message",
+    "book": "Book Appointment"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome",
+    "overview": "Overview",
+    "services": "Services",
+    "projects": "Projects",
+    "bookings": "Bookings",
+    "reviews": "Reviews",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "footer": {
+    "description": "Simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever.",
+    "recentPosts": "Recent Posts",
+    "address": "Address",
+    "services": "Services",
+    "rights": "All Rights Reserved"
+  },
+  "error": {
+    "404": "Page Not Found",
+    "notFound": "Sorry, the page you are looking for does not exist.",
+    "goHome": "Go Home",
+    "goBack": "Go Back",
+    "needHelp": "Do you need help?",
+    "helpText": "If you are looking for a specific page, you can use the menu above or search the site."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error occurred",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "language": "Language"
+  }
+}

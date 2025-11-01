@@ -1,0 +1,300 @@
+/* RTL/LTR Support Styles */
+
+/* Base RTL/LTR classes */
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+/* RTL-specific styles */
+.rtl .text-left {
+  text-align: right !important;
+}
+
+.rtl .text-right {
+  text-align: left !important;
+}
+
+.rtl .ml-auto {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+
+.rtl .mr-auto {
+  margin-right: 0 !important;
+  margin-left: auto !important;
+}
+
+.rtl .pl-4 {
+  padding-left: 0 !important;
+  padding-right: 1rem !important;
+}
+
+.rtl .pr-4 {
+  padding-right: 0 !important;
+  padding-left: 1rem !important;
+}
+
+.rtl .ml-4 {
+  margin-left: 0 !important;
+  margin-right: 1rem !important;
+}
+
+.rtl .mr-4 {
+  margin-right: 0 !important;
+  margin-left: 1rem !important;
+}
+
+/* Flexbox RTL support */
+.rtl .flex-row {
+  flex-direction: row-reverse;
+}
+
+.rtl .flex-row-reverse {
+  flex-direction: row;
+}
+
+/* Grid RTL support */
+.rtl .grid-cols-2 > *:nth-child(1) {
+  order: 2;
+}
+
+.rtl .grid-cols-2 > *:nth-child(2) {
+  order: 1;
+}
+
+/* Form elements RTL support */
+.rtl input[type="text"],
+.rtl input[type="email"],
+.rtl input[type="tel"],
+.rtl input[type="password"],
+.rtl textarea {
+  text-align: right;
+}
+
+.rtl input::placeholder,
+.rtl textarea::placeholder {
+  text-align: right;
+}
+
+/* Navigation RTL support */
+.rtl .nav-link {
+  text-align: right;
+}
+
+.rtl .dropdown-menu {
+  right: 0;
+  left: auto;
+}
+
+/* Card and component RTL support */
+.rtl .card-body {
+  text-align: right;
+}
+
+.rtl .card-title {
+  text-align: right;
+}
+
+.rtl .card-text {
+  text-align: right;
+}
+
+/* Button groups RTL support */
+.rtl .btn-group {
+  flex-direction: row-reverse;
+}
+
+/* Modal RTL support */
+.rtl .modal-header {
+  flex-direction: row-reverse;
+}
+
+.rtl .modal-body {
+  text-align: right;
+}
+
+/* Table RTL support */
+.rtl table {
+  direction: rtl;
+}
+
+.rtl th,
+.rtl td {
+  text-align: right;
+}
+
+/* List RTL support */
+.rtl ul,
+.rtl ol {
+  padding-right: 1.5rem;
+  padding-left: 0;
+}
+
+.rtl li {
+  text-align: right;
+}
+
+/* Icon positioning RTL support */
+.rtl .icon-left {
+  margin-right: 0.5rem;
+  margin-left: 0;
+}
+
+.rtl .icon-right {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+/* Spacing utilities for RTL */
+.rtl .space-x-4 > * + * {
+  margin-left: 0;
+  margin-right: 1rem;
+}
+
+.rtl .space-x-6 > * + * {
+  margin-left: 0;
+  margin-right: 1.5rem;
+}
+
+.rtl .space-x-8 > * + * {
+  margin-left: 0;
+  margin-right: 2rem;
+}
+
+/* Responsive RTL support */
+@media (max-width: 768px) {
+  .rtl .md\\:text-left {
+    text-align: right !important;
+  }
+  
+  .rtl .md\\:text-right {
+    text-align: left !important;
+  }
+}
+
+/* Animation and transition RTL support */
+.rtl .transform {
+  transform: scaleX(-1);
+}
+
+.rtl .hover\\:transform:hover {
+  transform: scaleX(-1);
+}
+
+/* Custom RTL utilities */
+.rtl .rtl-text {
+  text-align: right;
+}
+
+.rtl .rtl-flex {
+  flex-direction: row-reverse;
+}
+
+.rtl .rtl-grid {
+  direction: rtl;
+}
+
+/* Ensure proper font rendering for Arabic */
+.rtl {
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+}
+
+.rtl h1,
+.rtl h2,
+.rtl h3,
+.rtl h4,
+.rtl h5,
+.rtl h6 {
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  font-weight: 600;
+}
+
+/* Number formatting for RTL */
+.rtl .number {
+  direction: ltr;
+  text-align: left;
+  display: inline-block;
+}
+
+/* Date and time formatting for RTL */
+.rtl .date,
+.rtl .time {
+  direction: ltr;
+  text-align: left;
+  display: inline-block;
+}
+
+/* Currency formatting for RTL */
+.rtl .currency {
+  direction: ltr;
+  text-align: left;
+  display: inline-block;
+}
+
+/* Email and URL formatting for RTL */
+.rtl .email,
+.rtl .url {
+  direction: ltr;
+  text-align: left;
+  display: inline-block;
+}
+
+/* Phone number formatting for RTL */
+.rtl .phone {
+  direction: ltr;
+  text-align: left;
+  display: inline-block;
+}
+
+/* Pricing page RTL support */
+.rtl .pricing-card {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl .pricing-card h3,
+.rtl .pricing-card h4 {
+  text-align: right;
+}
+
+.rtl .pricing-card .feature-list {
+  direction: rtl;
+}
+
+.rtl .pricing-card .feature-item {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  text-align: right;
+}
+
+.rtl .pricing-card .feature-item .icon {
+  margin-left: 0.75rem;
+  margin-right: 0;
+}
+
+.rtl .pricing-card .feature-item .text {
+  text-align: right;
+  direction: rtl;
+}
+
+/* Ensure proper RTL for pricing plan features */
+.rtl .space-y-4 > * {
+  text-align: right;
+  direction: rtl;
+}
+
+.rtl .space-y-4 .flex {
+  flex-direction: row-reverse;
+}
+
+.rtl .space-y-4 .flex .text-gray-700 {
+  text-align: right;
+  direction: rtl;
+}
