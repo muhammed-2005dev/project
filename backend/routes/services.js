@@ -192,17 +192,17 @@ router.get('/categories/list', catchAsync(async (req, res, next) => {
 // @desc    Get featured services
 // @route   GET /api/services/featured/list
 // @access  Public
-router.get('/featured/list', catchAsync(async (req, res, next) => {
-  const services = await Service.findPopular();
+// router.get('/featured/list', catchAsync(async (req, res, next) => {
+//   const services = await Service.findPopular();
 
-  res.status(200).json({
-    status: 'success',
-    results: services.length,
-    data: {
-      services
-    }
-  });
-}));
+//   res.status(200).json({
+//     status: 'success',
+//     results: services.length,
+//     data: {
+//       services
+//     }
+//   });
+// }));
 
 // @desc    Search services
 // @route   GET /api/services/search/:query

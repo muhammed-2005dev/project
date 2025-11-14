@@ -27,82 +27,83 @@ const Blog: React.FC = () => {
     try {
       setLoading(true);
       // Mock data for demonstration
-      const mockBlogs = [
-        {
-          _id: '1',
-          title: 'How to Choose the Right Car Service Center',
-          titleAr: 'كيفية اختيار مركز خدمة السيارات المناسب',
-          excerpt: 'A guide to choosing a reliable service center',
-          excerptAr: 'دليل لاختيار مركز خدمة موثوق',
-          category: 'Guide',
-          categoryAr: 'دليل',
-          author: { name: 'Admin', nameAr: 'المدير' },
-          createdAt: '2024-01-15',
-          images: [{ url: 'https://images.unsplash.com/photo-1486754735734-325b5831c3ad?w=500' }]
-        },
-        {
-          _id: '2',
-          title: '10 Essential Tips for Car Maintenance',
-          titleAr: '10 نصائح أساسية لصيانة السيارة',
-          excerpt: 'Basic maintenance tips for car owners',
-          excerptAr: 'نصائح صيانة أساسية لأصحاب السيارات',
-          category: 'Maintenance',
-          categoryAr: 'صيانة',
-          author: { name: 'Admin', nameAr: 'المدير' },
-          createdAt: '2024-01-10',
-          images: [{ url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500' }]
-        },
-        {
-          _id: '3',
-          title: 'Warning Signs in Your Car You Shouldn\'t Ignore',
-          titleAr: 'علامات تحذيرية في سيارتك لا يجب تجاهلها',
-          excerpt: 'Important signs that need immediate attention',
-          excerptAr: 'علامات مهمة تحتاج إلى انتباه فوري',
-          category: 'Tips',
-          categoryAr: 'نصائح',
-          author: { name: 'Admin', nameAr: 'المدير' },
-          createdAt: '2024-01-05',
-          images: [{ url: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=500' }]
-        },
-        {
-          _id: '4',
-          title: 'Benefits of Regular Engine Oil Changes',
-          titleAr: 'فوائد تغيير زيت المحرك بانتظام',
-          excerpt: 'Why you should change engine oil regularly',
-          excerptAr: 'لماذا يجب تغيير زيت المحرك بانتظام',
-          category: 'Maintenance',
-          categoryAr: 'صيانة',
-          author: { name: 'Admin', nameAr: 'المدير' },
-          createdAt: '2024-01-01',
-          images: [{ url: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=500' }]
-        },
-        {
-          _id: '5',
-          title: 'Complete Guide to Tire Maintenance',
-          titleAr: 'دليل شامل لصيانة الإطارات',
-          excerpt: 'How to take care of your car tires',
-          excerptAr: 'كيفية العناية بإطارات سيارتك',
-          category: 'Guide',
-          categoryAr: 'دليل',
-          author: { name: 'Admin', nameAr: 'المدير' },
-          createdAt: '2023-12-28',
-          images: [{ url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500' }]
-        },
-        {
-          _id: '6',
-          title: 'Tips for Safe Winter Driving',
-          titleAr: 'نصائح لقيادة آمنة في الشتاء',
-          excerpt: 'How to drive safely in cold weather',
-          excerptAr: 'كيفية القيادة بأمان في الطقس البارد',
-          category: 'Tips',
-          categoryAr: 'نصائح',
-          author: { name: 'Admin', nameAr: 'المدير' },
-          createdAt: '2023-12-20',
-          images: [{ url: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=500' }]
-        }
-      ];
-      
-      setBlogs(mockBlogs);
+      // const mockBlogs = [
+      //   {
+      //     _id: '1',
+      //     title: 'How to Choose the Right Car Service Center',
+      //     titleAr: 'كيفية اختيار مركز خدمة السيارات المناسب',
+      //     excerpt: 'A guide to choosing a reliable service center',
+      //     excerptAr: 'دليل لاختيار مركز خدمة موثوق',
+      //     category: 'Guide',
+      //     categoryAr: 'دليل',
+      //     author: { name: 'Admin', nameAr: 'المدير' },
+      //     createdAt: '2024-01-15',
+      //     images: [{ url: 'https://images.unsplash.com/photo-1486754735734-325b5831c3ad?w=500' }]
+      //   },
+      //   {
+      //     _id: '2',
+      //     title: '10 Essential Tips for Car Maintenance',
+      //     titleAr: '10 نصائح أساسية لصيانة السيارة',
+      //     excerpt: 'Basic maintenance tips for car owners',
+      //     excerptAr: 'نصائح صيانة أساسية لأصحاب السيارات',
+      //     category: 'Maintenance',
+      //     categoryAr: 'صيانة',
+      //     author: { name: 'Admin', nameAr: 'المدير' },
+      //     createdAt: '2024-01-10',
+      //     images: [{ url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500' }]
+      //   },
+      //   {
+      //     _id: '3',
+      //     title: 'Warning Signs in Your Car You Shouldn\'t Ignore',
+      //     titleAr: 'علامات تحذيرية في سيارتك لا يجب تجاهلها',
+      //     excerpt: 'Important signs that need immediate attention',
+      //     excerptAr: 'علامات مهمة تحتاج إلى انتباه فوري',
+      //     category: 'Tips',
+      //     categoryAr: 'نصائح',
+      //     author: { name: 'Admin', nameAr: 'المدير' },
+      //     createdAt: '2024-01-05',
+      //     images: [{ url: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=500' }]
+      //   },
+      //   {
+      //     _id: '4',
+      //     title: 'Benefits of Regular Engine Oil Changes',
+      //     titleAr: 'فوائد تغيير زيت المحرك بانتظام',
+      //     excerpt: 'Why you should change engine oil regularly',
+      //     excerptAr: 'لماذا يجب تغيير زيت المحرك بانتظام',
+      //     category: 'Maintenance',
+      //     categoryAr: 'صيانة',
+      //     author: { name: 'Admin', nameAr: 'المدير' },
+      //     createdAt: '2024-01-01',
+      //     images: [{ url: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=500' }]
+      //   },
+      //   {
+      //     _id: '5',
+      //     title: 'Complete Guide to Tire Maintenance',
+      //     titleAr: 'دليل شامل لصيانة الإطارات',
+      //     excerpt: 'How to take care of your car tires',
+      //     excerptAr: 'كيفية العناية بإطارات سيارتك',
+      //     category: 'Guide',
+      //     categoryAr: 'دليل',
+      //     author: { name: 'Admin', nameAr: 'المدير' },
+      //     createdAt: '2023-12-28',
+      //     images: [{ url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500' }]
+      //   },
+      //   {
+      //     _id: '6',
+      //     title: 'Tips for Safe Winter Driving',
+      //     titleAr: 'نصائح لقيادة آمنة في الشتاء',
+      //     excerpt: 'How to drive safely in cold weather',
+      //     excerptAr: 'كيفية القيادة بأمان في الطقس البارد',
+      //     category: 'Tips',
+      //     categoryAr: 'نصائح',
+      //     author: { name: 'Admin', nameAr: 'المدير' },
+      //     createdAt: '2023-12-20',
+      //     images: [{ url: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=500' }]
+      //   }
+      // ];
+      const response = await blogAPI.getAll();
+      console.log(response.data.data.posts);
+      setBlogs(response.data.data.posts.map((blog) => blog._doc));
     } catch (error) {
       console.error('Error fetching blogs:', error);
       toast.error(isRTL ? 'فشل في تحميل المقالات' : 'Failed to load blog posts');
@@ -117,7 +118,7 @@ const Blog: React.FC = () => {
       setFilteredBlogs(blogs);
     } else {
       // Filter by category
-      const filterCategories = ['All Posts', 'Maintenance', 'Guide', 'Tips'];
+      const filterCategories = ['All Posts', 'maintenance', 'Guide', 'Tips'];
       const selectedCategory = filterCategories[activeFilter];
       const filtered = blogs.filter(blog => {
         return blog.category === selectedCategory;

@@ -55,17 +55,17 @@ const Services: React.FC = () => {
   const getServiceData = (service) => {
     if (isRTL) {
       return {
-        title: service.nameAr || service.name,
-        description: service.descriptionAr || service.description,
-        price: service.priceAr || `من ${service.price} ريال`,
-        category: service.categoryAr || service.category
+        title: service._doc.nameAr || service._doc.name,
+        description: service._doc.descriptionAr || service._doc.description,
+        price: service._doc.priceAr || `من ${service._doc.price} ريال`,
+        category: service._doc.categoryAr || service._doc.category
       };
     }
     return {
-      title: service.name,
-      description: service.description,
-      price: `From ${service.price} SAR`,
-      category: service.category
+      title: service._doc.name,
+      description: service._doc.description,
+      price: `From ${service._doc.price} SAR`,
+      category: service._doc.category
     };
   };
 

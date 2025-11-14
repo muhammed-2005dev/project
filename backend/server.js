@@ -48,11 +48,6 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// RTL/LTR support middleware
-const { rtlSupport, formatResponseMiddleware } = require('./middleware/rtlSupport');
-app.use(rtlSupport);
-app.use(formatResponseMiddleware);
-
 // MongoDB connection (optional for development)
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/autologic', {
   useNewUrlParser: true,
@@ -70,9 +65,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/autologic
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/services', require('./routes/services'));
-app.use('/api/projects', require('./routes/projects'));
 app.use('/api/bookings', require('./routes/bookings'));
-app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/blog', require('./routes/blog'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/upload', require('./routes/upload'));
