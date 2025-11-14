@@ -2,7 +2,6 @@ const express = require('express');
 const { body, query } = require('express-validator');
 const { protect, authorize } = require('../middleware/auth');
 const { catchAsync } = require('../middleware/errorHandler');
-const { uploadSingle } = require('../utils/cloudinary');
 const User = require('../models/User');
 const AppError = require('../utils/appError');
 
@@ -77,18 +76,13 @@ router.get('/:id', protect, authorize('admin'), catchAsync(async (req, res, next
 // @desc    Create new user
 // @route   POST /api/users
 // @access  Private/Admin
-router.post('/', protect, authorize('admin'), uploadSingle('profileImage'), userValidation, catchAsync(async (req, res, next) => {
+router.post('/', protect, authorize('admin'), userValidation, catchAsync(async (req, res, next) => {
   const userData = req.body;
 
   // Check if user already exists
-  const existingUser = await User.findByEmail(userData.email);
+  const existingUser = await User.findOne({ email: userData.email });
   if (existingUser) {
     return next(new AppError('User already exists with this email', 400));
-  }
-
-  // Add profile image if uploaded
-  if (req.file) {
-    userData.profileImage = req.file.path;
   }
 
   const user = await User.create(userData);
@@ -104,7 +98,7 @@ router.post('/', protect, authorize('admin'), uploadSingle('profileImage'), user
 // @desc    Update user
 // @route   PUT /api/users/:id
 // @access  Private/Admin
-router.put('/:id', protect, authorize('admin'), uploadSingle('profileImage'), userValidation, catchAsync(async (req, res, next) => {
+router.put('/:id', protect, authorize('admin'), userValidation, catchAsync(async (req, res, next) => {
   const user = await User.findById(req.params.id);
 
   if (!user) {
@@ -112,11 +106,6 @@ router.put('/:id', protect, authorize('admin'), uploadSingle('profileImage'), us
   }
 
   const userData = req.body;
-
-  // Add profile image if uploaded
-  if (req.file) {
-    userData.profileImage = req.file.path;
-  }
 
   const updatedUser = await User.findByIdAndUpdate(
     req.params.id,
@@ -145,16 +134,6 @@ router.delete('/:id', protect, authorize('admin'), catchAsync(async (req, res, n
   // Prevent deleting own account
   if (user._id.toString() === req.user._id.toString()) {
     return next(new AppError('Cannot delete your own account', 400));
-  }
-
-  // Delete profile image from Cloudinary
-  if (user.profileImage) {
-    const { deleteFile } = require('../utils/cloudinary');
-    try {
-      await deleteFile(user.profileImage);
-    } catch (error) {
-      console.error('Error deleting user profile image:', error);
-    }
   }
 
   await User.findByIdAndDelete(req.params.id);
@@ -254,8 +233,6 @@ router.get('/stats/overview', protect, authorize('admin'), catchAsync(async (req
         adminUsers: { $sum: { $cond: [{ $eq: ['$role', 'admin'] }, 1, 0] } },
         technicianUsers: { $sum: { $cond: [{ $eq: ['$role', 'technician'] }, 1, 0] } },
         regularUsers: { $sum: { $cond: [{ $eq: ['$role', 'user'] }, 1, 0] } },
-        verifiedUsers: { $sum: { $cond: [{ $eq: ['$isEmailVerified', true] }, 1, 0] } },
-        unverifiedUsers: { $sum: { $cond: [{ $eq: ['$isEmailVerified', false] }, 1, 0] } }
       }
     }
   ]);

@@ -90,20 +90,8 @@ const notFound = (req, res, next) => {
   next(error);
 };
 
-// Validation error handler
-const handleValidationErrors = (errors) => {
-  const formattedErrors = errors.array().map(error => ({
-    field: error.path,
-    message: error.msg,
-    value: error.value
-  }));
-
-  return new AppError('Validation failed', 400, formattedErrors);
-};
-
 module.exports = {
   globalErrorHandler,
   catchAsync,
-  notFound,
-  handleValidationErrors
+  notFound
 };

@@ -166,13 +166,6 @@ const registerRateLimit = createRateLimit(
   'Too many registration attempts. Please try again in 1 hour.'
 );
 
-// Password reset rate limiting
-const passwordResetRateLimit = createRateLimit(
-  60 * 60 * 1000, // 1 hour
-  3, // 3 attempts
-  'Too many password reset attempts. Please try again in 1 hour.'
-);
-
 // Contact form rate limiting
 const contactRateLimit = createRateLimit(
   60 * 60 * 1000, // 1 hour
@@ -187,6 +180,5 @@ module.exports = {
   checkOwnership,
   loginRateLimit,
   registerRateLimit,
-  passwordResetRateLimit,
   contactRateLimit
 };

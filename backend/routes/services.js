@@ -11,9 +11,7 @@ const router = express.Router();
 // Validation rules
 const serviceValidation = [
   body('name').trim().notEmpty().withMessage('Service name is required'),
-  body('nameAr').trim().notEmpty().withMessage('Arabic service name is required'),
   body('description').trim().notEmpty().withMessage('Service description is required'),
-  body('descriptionAr').trim().notEmpty().withMessage('Arabic service description is required'),
   body('price').isNumeric().withMessage('Price must be a number'),
   body('duration').isInt({ min: 1 }).withMessage('Duration must be at least 1 hour'),
   body('category').isIn(['engine', 'transmission', 'brakes', 'tires', 'battery', 'diagnostic', 'oil', 'ac', 'other']).withMessage('Invalid category')
@@ -34,7 +32,6 @@ router.get('/', [
   // Build filter
   const filter = {};
   if (category) filter.category = category;
-  if (featured !== undefined) filter.isPopular = featured === 'true';
   if (active !== undefined) filter.isActive = active === 'true';
 
   // Pagination
@@ -189,21 +186,6 @@ router.get('/categories/list', catchAsync(async (req, res, next) => {
   });
 }));
 
-// @desc    Get featured services
-// @route   GET /api/services/featured/list
-// @access  Public
-// router.get('/featured/list', catchAsync(async (req, res, next) => {
-//   const services = await Service.findPopular();
-
-//   res.status(200).json({
-//     status: 'success',
-//     results: services.length,
-//     data: {
-//       services
-//     }
-//   });
-// }));
-
 // @desc    Search services
 // @route   GET /api/services/search/:query
 // @access  Public
@@ -216,10 +198,7 @@ router.get('/search/:query', catchAsync(async (req, res, next) => {
   const services = await Service.find({
     $or: [
       { name: { $regex: query, $options: 'i' } },
-      { nameAr: { $regex: query, $options: 'i' } },
       { description: { $regex: query, $options: 'i' } },
-      { descriptionAr: { $regex: query, $options: 'i' } },
-      { tags: { $in: [new RegExp(query, 'i')] } }
     ],
     isActive: true
   })
@@ -230,10 +209,7 @@ router.get('/search/:query', catchAsync(async (req, res, next) => {
   const total = await Service.countDocuments({
     $or: [
       { name: { $regex: query, $options: 'i' } },
-      { nameAr: { $regex: query, $options: 'i' } },
       { description: { $regex: query, $options: 'i' } },
-      { descriptionAr: { $regex: query, $options: 'i' } },
-      { tags: { $in: [new RegExp(query, 'i')] } }
     ],
     isActive: true
   });

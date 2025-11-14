@@ -11,11 +11,8 @@ const router = express.Router();
 // Validation rules
 const blogValidation = [
   body('title').trim().notEmpty().withMessage('Blog title is required'),
-  // body('titleAr').trim().notEmpty().withMessage('Arabic blog title is required'),
   body('excerpt').trim().notEmpty().withMessage('Blog excerpt is required'),
-  // body('excerptAr').trim().notEmpty().withMessage('Arabic blog excerpt is required'),
   body('content').trim().notEmpty().withMessage('Blog content is required'),
-  // body('contentAr').trim().notEmpty().withMessage('Arabic blog content is required'),
   body('category').isIn(['maintenance', 'repair', 'tips', 'news', 'reviews', 'guides', 'other']).withMessage('Invalid category')
 ];
 
@@ -65,9 +62,7 @@ router.get('/', [
     await Blog.countDocuments({
       $or: [
         { title: { $regex: search, $options: 'i' } },
-        // { titleAr: { $regex: search, $options: 'i' } },
         { content: { $regex: search, $options: 'i' } },
-        // { contentAr: { $regex: search, $options: 'i' } },
         { tags: { $in: [new RegExp(search, 'i')] } }
       ],
       status: 'published',
@@ -93,7 +88,6 @@ router.get('/', [
 router.get('/:id', optionalAuth, catchAsync(async (req, res, next) => {
   const post = await Blog.findById(req.params.id)
     .populate('author', 'firstName lastName')
-    .populate('relatedPosts', 'title titleAr slug featuredImage publishedAt');
 
   if (!post) {
     return next(new AppError('Blog post not found', 404));
@@ -103,10 +97,6 @@ router.get('/:id', optionalAuth, catchAsync(async (req, res, next) => {
   if (!post.isPublic && (!req.user || req.user.role !== 'admin')) {
     return next(new AppError('Blog post not found', 404));
   }
-
-  // Increment view count
-  post.views += 1;
-  await post.save({ validateBeforeSave: false });
 
   res.status(200).json({
     status: 'success',
@@ -122,7 +112,6 @@ router.get('/:id', optionalAuth, catchAsync(async (req, res, next) => {
 router.get('/slug/:slug', optionalAuth, catchAsync(async (req, res, next) => {
   const post = await Blog.findOne({ slug: req.params.slug })
     .populate('author', 'firstName lastName')
-    .populate('relatedPosts', 'title titleAr slug featuredImage publishedAt');
 
   if (!post) {
     return next(new AppError('Blog post not found', 404));
@@ -132,10 +121,6 @@ router.get('/slug/:slug', optionalAuth, catchAsync(async (req, res, next) => {
   if (!post.isPublic && (!req.user || req.user.role !== 'admin')) {
     return next(new AppError('Blog post not found', 404));
   }
-
-  // Increment view count
-  post.views += 1;
-  await post.save({ validateBeforeSave: false });
 
   res.status(200).json({
     status: 'success',
@@ -320,102 +305,6 @@ router.get('/featured/list', catchAsync(async (req, res, next) => {
     }
   });
 }));
-
-// @desc    Get related blog posts
-// @route   GET /api/blog/:id/related
-// @access  Public
-router.get('/:id/related', catchAsync(async (req, res, next) => {
-  const post = await Blog.findById(req.params.id);
-
-  if (!post) {
-    return next(new AppError('Blog post not found', 404));
-  }
-
-  const relatedPosts = await Blog.findRelated(
-    post._id,
-    post.category,
-    post.tags,
-    5
-  );
-
-  res.status(200).json({
-    status: 'success',
-    results: relatedPosts.length,
-    data: {
-      posts: relatedPosts
-    }
-  });
-}));
-
-// @desc    Add comment to blog post
-// @route   POST /api/blog/:id/comments
-// @access  Private
-// router.post('/:id/comments', protect, [
-//   body('content').trim().notEmpty().withMessage('Comment content is required'),
-//   body('contentAr').trim().notEmpty().withMessage('Arabic comment content is required')
-// ], catchAsync(async (req, res, next) => {
-//   const post = await Blog.findById(req.params.id);
-
-//   if (!post) {
-//     return next(new AppError('Blog post not found', 404));
-//   }
-
-//   const comment = {
-//     author: req.user._id,
-//     content: req.body.content,
-//     contentAr: req.body.contentAr,
-//     isApproved: req.user.role === 'admin' // Auto-approve admin comments
-//   };
-
-//   post.comments.push(comment);
-//   await post.save();
-
-//   // Populate the comment author
-//   await post.populate('comments.author', 'firstName lastName');
-
-//   res.status(201).json({
-//     status: 'success',
-//     data: {
-//       post
-//     }
-//   });
-// }));
-
-// @desc    Like blog post
-// @route   POST /api/blog/:id/like
-// @access  Private
-// router.post('/:id/like', protect, catchAsync(async (req, res, next) => {
-//   const post = await Blog.findById(req.params.id);
-
-//   if (!post) {
-//     return next(new AppError('Blog post not found', 404));
-//   }
-
-//   // Check if user already liked
-//   const alreadyLiked = post.likes.users.includes(req.user._id);
-  
-//   if (alreadyLiked) {
-//     // Remove like
-//     post.likes.users = post.likes.users.filter(
-//       userId => userId.toString() !== req.user._id.toString()
-//     );
-//     post.likes.count = Math.max(0, post.likes.count - 1);
-//   } else {
-//     // Add like
-//     post.likes.users.push(req.user._id);
-//     post.likes.count += 1;
-//   }
-
-//   await post.save();
-
-//   res.status(200).json({
-//     status: 'success',
-//     data: {
-//       likes: post.likes.count,
-//       userLiked: !alreadyLiked
-//     }
-//   });
-// }));
 
 // @desc    Update blog post status
 // @route   PUT /api/blog/:id/status

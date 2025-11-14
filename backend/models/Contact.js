@@ -42,48 +42,6 @@ const contactSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
-  responses: [{
-    message: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now
-    },
-    isInternal: {
-      type: Boolean,
-      default: false
-    }
-  }],
-  attachments: [{
-    filename: {
-      type: String,
-      required: true
-    },
-    url: {
-      type: String,
-      required: true
-    },
-    publicId: {
-      type: String,
-      required: true
-    },
-    size: {
-      type: Number,
-      required: true
-    },
-    mimeType: {
-      type: String,
-      required: true
-    }
-  }],
   ipAddress: String,
   userAgent: String,
 }, {

@@ -2,8 +2,6 @@ const express = require('express');
 const { body, query } = require('express-validator');
 const { protect, authorize, contactRateLimit } = require('../middleware/auth');
 const { catchAsync } = require('../middleware/errorHandler');
-// const { uploadMultiple } = require('../utils/cloudinary');
-// const { sendContactNotificationEmail } = require('../utils/email');
 const Contact = require('../models/Contact');
 const AppError = require('../utils/appError');
 
@@ -14,10 +12,7 @@ const contactValidation = [
   body('name').trim().notEmpty().withMessage('Name is required'),
   body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
   body('phone').isMobilePhone().withMessage('Valid phone number is required'),
-  body('subject').trim().notEmpty().withMessage('Subject is required'),
-  body('subjectAr').trim().notEmpty().withMessage('Arabic subject is required'),
   body('message').trim().notEmpty().withMessage('Message is required'),
-  body('messageAr').trim().notEmpty().withMessage('Arabic message is required'),
   body('type').optional().isIn(['general', 'complaint', 'suggestion', 'support', 'business', 'partnership']),
   body('priority').optional().isIn(['low', 'medium', 'high', 'urgent'])
 ];
@@ -27,17 +22,6 @@ const contactValidation = [
 // @access  Public
 router.post('/', contactRateLimit, contactValidation, catchAsync(async (req, res, next) => {
   const contactData = req.body;
-
-  // Add attachments if uploaded
-  // if (req.files && req.files.length > 0) {
-  //   contactData.attachments = req.files.map(file => ({
-  //     filename: file.originalname,
-  //     url: file.path,
-  //     publicId: file.filename,
-  //     size: file.size,
-  //     mimeType: file.mimetype
-  //   }));
-  // }
 
   // Add IP address and user agent
   contactData.ipAddress = req.ip;
@@ -61,7 +45,6 @@ router.post('/', contactRateLimit, contactValidation, catchAsync(async (req, res
         id: contact._id,
         name: contact.name,
         email: contact.email,
-        subject: contact.subject,
         type: contact.type,
         priority: contact.priority,
         status: contact.status,
@@ -120,7 +103,6 @@ router.get('/', protect, authorize('admin'), [
 router.get('/:id', protect, authorize('admin'), catchAsync(async (req, res, next) => {
   const contact = await Contact.findById(req.params.id)
     .populate('assignedTo', 'firstName lastName email')
-    .populate('responses.author', 'firstName lastName');
 
   if (!contact) {
     return next(new AppError('Contact submission not found', 404));
@@ -161,67 +143,6 @@ router.put('/:id', protect, authorize('admin'), [
     }
   });
 }));
-
-// @desc    Add response to contact submission
-// @route   POST /api/contact/:id/respond
-// @access  Private/Admin
-// router.post('/:id/respond', protect, authorize('admin'), [
-//   body('message').trim().notEmpty().withMessage('Response message is required'),
-//   body('messageAr').trim().notEmpty().withMessage('Arabic response message is required'),
-//   body('isInternal').optional().isBoolean()
-// ], catchAsync(async (req, res, next) => {
-//   const contact = await Contact.findById(req.params.id);
-
-//   if (!contact) {
-//     return next(new AppError('Contact submission not found', 404));
-//   }
-
-//   const response = {
-//     message: req.body.message,
-//     messageAr: req.body.messageAr,
-//     author: req.user._id,
-//     isInternal: req.body.isInternal || false
-//   };
-
-//   contact.responses.push(response);
-//   await contact.save();
-
-//   // Populate the response author
-//   await contact.populate('responses.author', 'firstName lastName');
-
-//   res.status(201).json({
-//     status: 'success',
-//     data: {
-//       contact
-//     }
-//   });
-// }));
-
-// @desc    Assign contact to user
-// @route   PUT /api/contact/:id/assign
-// @access  Private/Admin
-// router.put('/:id/assign', protect, authorize('admin'), [
-//   body('assignedTo').isMongoId().withMessage('Valid user ID is required')
-// ], catchAsync(async (req, res, next) => {
-//   const contact = await Contact.findById(req.params.id);
-
-//   if (!contact) {
-//     return next(new AppError('Contact submission not found', 404));
-//   }
-
-//   contact.assignedTo = req.body.assignedTo;
-//   await contact.save();
-
-//   // Populate assigned user
-//   await contact.populate('assignedTo', 'firstName lastName email');
-
-//   res.status(200).json({
-//     status: 'success',
-//     data: {
-//       contact
-//     }
-//   });
-// }));
 
 // @desc    Resolve contact submission
 // @route   PUT /api/contact/:id/resolve
@@ -267,42 +188,6 @@ router.put('/:id/close', protect, authorize('admin'), catchAsync(async (req, res
   });
 }));
 
-// @desc    Rate contact resolution
-// @route   POST /api/contact/:id/rate
-// @access  Public
-// router.post('/:id/rate', [
-//   body('rating').isInt({ min: 1, max: 5 }).withMessage('Rating must be between 1 and 5'),
-//   body('comment').optional().trim().isLength({ max: 500 }).withMessage('Comment cannot exceed 500 characters'),
-//   body('commentAr').optional().trim().isLength({ max: 500 }).withMessage('Arabic comment cannot exceed 500 characters')
-// ], catchAsync(async (req, res, next) => {
-//   const contact = await Contact.findById(req.params.id);
-
-//   if (!contact) {
-//     return next(new AppError('Contact submission not found', 404));
-//   }
-
-//   if (contact.status !== 'resolved' && contact.status !== 'closed') {
-//     return next(new AppError('Contact must be resolved before rating', 400));
-//   }
-
-//   contact.satisfaction = {
-//     rating: req.body.rating,
-//     comment: req.body.comment,
-//     commentAr: req.body.commentAr,
-//     ratedAt: new Date()
-//   };
-
-//   await contact.save();
-
-//   res.status(200).json({
-//     status: 'success',
-//     message: 'Rating submitted successfully',
-//     data: {
-//       satisfaction: contact.satisfaction
-//     }
-//   });
-// }));
-
 // @desc    Get contact statistics
 // @route   GET /api/contact/stats/overview
 // @access  Private/Admin
@@ -341,17 +226,6 @@ router.delete('/:id', protect, authorize('admin'), catchAsync(async (req, res, n
   if (!contact) {
     return next(new AppError('Contact submission not found', 404));
   }
-
-  // Delete attachments from Cloudinary
-  // if (contact.attachments && contact.attachments.length > 0) {
-  //   const { deleteMultipleFiles } = require('../utils/cloudinary');
-  //   const publicIds = contact.attachments.map(attachment => attachment.publicId);
-  //   try {
-  //     await deleteMultipleFiles(publicIds);
-  //   } catch (error) {
-  //     console.error('Error deleting contact attachments:', error);
-  //   }
-  // }
 
   await Contact.findByIdAndDelete(req.params.id);
 

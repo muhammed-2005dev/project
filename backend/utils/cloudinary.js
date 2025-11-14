@@ -26,41 +26,9 @@ const createCloudinaryStorage = (folder, allowedFormats = ['jpg', 'jpeg', 'png',
 
 // Multer configuration for different upload types
 const uploadConfigs = {
-  // User profile images
-  profileImage: multer({
-    storage: createCloudinaryStorage('autologic/users'),
-    limits: {
-      fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024, // 5MB
-    },
-    fileFilter: (req, file, cb) => {
-      const allowedTypes = (process.env.ALLOWED_FILE_TYPES || 'image/jpeg,image/png,image/gif,image/webp').split(',');
-      if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new Error('Invalid file type. Only images are allowed.'), false);
-      }
-    }
-  }),
-
   // Service images
   serviceImages: multer({
     storage: createCloudinaryStorage('autologic/services'),
-    limits: {
-      fileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024, // 10MB
-    },
-    fileFilter: (req, file, cb) => {
-      const allowedTypes = (process.env.ALLOWED_FILE_TYPES || 'image/jpeg,image/png,image/gif,image/webp').split(',');
-      if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new Error('Invalid file type. Only images are allowed.'), false);
-      }
-    }
-  }),
-
-  // Project images
-  projectImages: multer({
-    storage: createCloudinaryStorage('autologic/projects'),
     limits: {
       fileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024, // 10MB
     },
@@ -88,38 +56,6 @@ const uploadConfigs = {
         cb(new Error('Invalid file type. Only images are allowed.'), false);
       }
     }
-  }),
-
-  // Review images
-  reviewImages: multer({
-    storage: createCloudinaryStorage('autologic/reviews'),
-    limits: {
-      fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024, // 5MB
-    },
-    fileFilter: (req, file, cb) => {
-      const allowedTypes = (process.env.ALLOWED_FILE_TYPES || 'image/jpeg,image/png,image/gif,image/webp').split(',');
-      if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new Error('Invalid file type. Only images are allowed.'), false);
-      }
-    }
-  }),
-
-  // Contact attachments
-  contactAttachments: multer({
-    storage: createCloudinaryStorage('autologic/contacts'),
-    limits: {
-      fileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024, // 10MB
-    },
-    fileFilter: (req, file, cb) => {
-      const allowedTypes = 'image/jpeg,image/png,image/gif,image/webp,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document'.split(',');
-      if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new Error('Invalid file type.'), false);
-      }
-    }
   })
 };
 
@@ -131,11 +67,6 @@ const uploadSingle = (uploadType) => {
 // Upload multiple files
 const uploadMultiple = (uploadType, maxCount = 10) => {
   return uploadConfigs[uploadType].array('files', maxCount);
-};
-
-// Upload fields
-const uploadFields = (uploadType, fields) => {
-  return uploadConfigs[uploadType].fields(fields);
 };
 
 // Delete file from Cloudinary
@@ -160,41 +91,10 @@ const deleteMultipleFiles = async (publicIds) => {
   }
 };
 
-// Get file info
-const getFileInfo = async (publicId) => {
-  try {
-    const result = await cloudinary.api.resource(publicId);
-    return result;
-  } catch (error) {
-    console.error('Error getting file info from Cloudinary:', error);
-    throw new Error('Failed to get file info');
-  }
-};
-
-// Transform image
-const transformImage = (publicId, transformations = {}) => {
-  return cloudinary.url(publicId, transformations);
-};
-
-// Generate responsive image URLs
-const generateResponsiveUrls = (publicId) => {
-  return {
-    thumbnail: cloudinary.url(publicId, { width: 150, height: 150, crop: 'fill', quality: 'auto' }),
-    small: cloudinary.url(publicId, { width: 300, height: 200, crop: 'fill', quality: 'auto' }),
-    medium: cloudinary.url(publicId, { width: 600, height: 400, crop: 'fill', quality: 'auto' }),
-    large: cloudinary.url(publicId, { width: 1200, height: 800, crop: 'limit', quality: 'auto' }),
-    original: cloudinary.url(publicId, { quality: 'auto' })
-  };
-};
-
 module.exports = {
   cloudinary,
   uploadSingle,
   uploadMultiple,
-  uploadFields,
   deleteFile,
-  deleteMultipleFiles,
-  getFileInfo,
-  transformImage,
-  generateResponsiveUrls
+  deleteMultipleFiles
 };
