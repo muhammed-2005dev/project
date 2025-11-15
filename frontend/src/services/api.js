@@ -1,20 +1,19 @@
 // API Service Layer for Frontend-Backend Communication
 import axios from "axios";
-import { mockAPI } from "./mockData";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-// Create axios instance with default config
+// Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 5000, // 5 second timeout
+  timeout: 10000, // 10 seconds
 });
 
-// Add request interceptor to include auth token
+// Request interceptor: Attach Token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -23,167 +22,123 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Add response interceptor for error handling
+// Response interceptor: Handle 401 (Unauthorized)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = "/login";
+      // Only redirect if we are NOT already on the login page
+      if (window.location.pathname !== "/login") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }
 );
 
-// Helper function to handle API calls with fallback to mock data
-const apiCall = async (apiFunction, mockFunction) => {
-  try {
-    return await apiFunction();
-  } catch (error) {
-    console.warn("API call failed, using mock data:", error.message);
-    return await mockFunction();
-  }
-};
+// --- API DEFINITIONS ---
 
 // Auth API
 export const authAPI = {
-  login: async (credentials) => api.post("/auth/login", credentials),
   register: (userData) => api.post("/auth/register", userData),
-  logout: () => api.get("/auth/logout"),
+  login: (credentials) => api.post("/auth/login", credentials),
   getMe: () => api.get("/auth/me"),
-  forgotPassword: (email) => api.post("/auth/forgotpassword", { email }),
-  resetPassword: (token, password) =>
-    api.put(`/auth/resetpassword/${token}`, { password }),
-  updateDetails: (userData) => api.put("/auth/updatedetails", userData),
-  updatePassword: (passwords) => api.put("/auth/updatepassword", passwords),
+  updateDetails: (userData) => api.put("/auth/me", userData), // Fixed path
+  changePassword: (passwords) => api.put("/auth/change-password", passwords), // Fixed path
+  logout: () => api.post("/auth/logout"), // Changed to POST
 };
 
 // Services API
 export const servicesAPI = {
-  getAll: (params = {}) =>
-    apiCall(
-      () => api.get("/services", { params }),
-      () => mockAPI.services.getAll()
-    ),
-  getById: (id) =>
-    apiCall(
-      () => api.get(`/services/${id}`),
-      () => mockAPI.services.getById(id)
-    ),
-  create: (serviceData) => api.post("/services", serviceData),
-  update: (id, serviceData) => api.put(`/services/${id}`, serviceData),
-  delete: (id) => api.delete(`/services/${id}`),
-  getByCategory: (category) => api.get(`/services/category/${category}`),
+  getAll: (params) => api.get("/services", { params }),
+  getById: (id) => api.get(`/services/${id}`),
   getCategories: () => api.get("/services/categories/list"),
-  getFeatured: () => api.get("/services/featured/list"),
-  search: (query) => api.get(`/services/search?q=${query}`),
-};
-
-// Projects API
-export const projectsAPI = {
-  getAll: (params = {}) =>
-    apiCall(
-      () => api.get("/projects", { params }),
-      () => mockAPI.projects.getAll()
-    ),
-  getById: (id) =>
-    apiCall(
-      () => api.get(`/projects/${id}`),
-      () => mockAPI.projects.getById(id)
-    ),
-  create: (projectData) => api.post("/projects", projectData),
-  update: (id, projectData) => api.put(`/projects/${id}`, projectData),
-  delete: (id) => api.delete(`/projects/${id}`),
-  getByService: (serviceId) => api.get(`/projects/service/${serviceId}`),
-  getFeatured: () => api.get("/projects/featured/list"),
-  search: (query) => api.get(`/projects/search?q=${query}`),
+  // Admin Only
+  create: (formData) =>
+    api.post("/services", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+  update: (id, formData) =>
+    api.put(`/services/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+  delete: (id) => api.delete(`/services/${id}`),
+  deleteImage: (id, imageId) => api.delete(`/services/${id}/images/${imageId}`),
 };
 
 // Blog API
 export const blogAPI = {
-  getAll: (params = {}) =>
-    apiCall(
-      () => api.get("/blog", { params }),
-      () => mockAPI.blogs.getAll()
-    ),
-  getById: (id) =>
-    apiCall(
-      () => api.get(`/blog/${id}`),
-      () => mockAPI.blogs.getById(id)
-    ),
-  create: (postData) => api.post("/blog", postData),
-  update: (id, postData) => api.put(`/blog/${id}`, postData),
-  delete: (id) => api.delete(`/blog/${id}`),
-  getByCategory: (category) => api.get(`/blog/category/${category}`),
+  getAll: (params) => api.get("/blog", { params }),
+  getById: (id) => api.get(`/blog/${id}`),
+  getBySlug: (slug) => api.get(`/blog/slug/${slug}`),
   getCategories: () => api.get("/blog/categories/list"),
   getTags: () => api.get("/blog/tags/list"),
   getFeatured: () => api.get("/blog/featured/list"),
-  search: (query) => api.get(`/blog/search?q=${query}`),
+  // Admin Only
+  create: (formData) =>
+    api.post("/blog", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+  update: (id, formData) =>
+    api.put(`/blog/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+  delete: (id) => api.delete(`/blog/${id}`),
+  updateStatus: (id, status) => api.put(`/blog/${id}/status`, { status }),
+  deleteImage: (id, imageId) => api.delete(`/blog/${id}/images/${imageId}`),
 };
 
 // Bookings API
 export const bookingsAPI = {
-  getAll: (params = {}) => api.get("/bookings", { params }),
-  getById: (id) => api.get(`/bookings/${id}`),
+  // Public/User
   create: (bookingData) => api.post("/bookings", bookingData),
-  update: (id, bookingData) => api.put(`/bookings/${id}`, bookingData),
-  delete: (id) => api.delete(`/bookings/${id}`),
-  getByUser: (userId) => api.get(`/bookings/user/${userId}`),
-  getByService: (serviceId) => api.get(`/bookings/service/${serviceId}`),
-  updateStatus: (id, status) => api.patch(`/bookings/${id}/status`, { status }),
-};
+  getMyBookings: (params) => api.get("/bookings/my-bookings", { params }),
+  getById: (id) => api.get(`/bookings/${id}`),
+  cancel: (id) => api.put(`/bookings/${id}/cancel`),
+  getAvailableSlots: (date) =>
+    api.get(`/bookings/available-slots?date=${date}`),
 
-// Reviews API
-export const reviewsAPI = {
-  getAll: (params = {}) =>
-    apiCall(
-      () => api.get("/reviews", { params }),
-      () => mockAPI.reviews.getAll()
-    ),
-  getById: (id) => api.get(`/reviews/${id}`),
-  create: (reviewData) => api.post("/reviews", reviewData),
-  update: (id, reviewData) => api.put(`/reviews/${id}`, reviewData),
-  delete: (id) => api.delete(`/reviews/${id}`),
-  getByService: (serviceId) => api.get(`/reviews/service/${serviceId}`),
-  getByUser: (userId) => api.get(`/reviews/user/${userId}`),
-  getFeatured: () => api.get("/reviews/featured/list"),
+  // Admin Only
+  getAll: (params) => api.get("/bookings", { params }),
+  confirm: (id) => api.put(`/bookings/${id}/confirm`),
+  assignTechnician: (id, technicianId) =>
+    api.put(`/bookings/${id}/assign`, { technician: technicianId }),
+  updateStatus: (id, status) => api.put(`/bookings/${id}/status`, { status }),
 };
 
 // Contact API
 export const contactAPI = {
-  sendMessage: (messageData) => api.post("/contact", messageData),
-  getAll: (params = {}) => api.get("/contact", { params }),
+  sendMessage: (data) => api.post("/contact", data),
+  // Admin Only
+  getAll: (params) => api.get("/contact", { params }),
   getById: (id) => api.get(`/contact/${id}`),
-  updateStatus: (id, status) => api.patch(`/contact/${id}/status`, { status }),
+  updateStatus: (id, status) => api.put(`/contact/${id}/status`, { status }),
+  resolve: (id) => api.put(`/contact/${id}/resolve`),
+  close: (id) => api.put(`/contact/${id}/close`),
   delete: (id) => api.delete(`/contact/${id}`),
 };
 
-// Upload API
-export const uploadAPI = {
-  uploadImage: (formData) =>
-    api.post("/upload/image", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    }),
-  uploadMultiple: (formData) =>
-    api.post("/upload/multiple", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    }),
-  deleteImage: (publicId) => api.delete(`/upload/image/${publicId}`),
-};
-
-// Users API (Admin only)
+// Users API (Admin Only)
 export const usersAPI = {
-  getAll: (params = {}) => api.get("/users", { params }),
+  getAll: (params) => api.get("/users", { params }), // Uses routes/users.js
   getById: (id) => api.get(`/users/${id}`),
+  create: (userData) => api.post("/users", userData),
   update: (id, userData) => api.put(`/users/${id}`, userData),
   delete: (id) => api.delete(`/users/${id}`),
-  updateRole: (id, role) => api.patch(`/users/${id}/role`, { role }),
+  updateRole: (id, role) => api.put(`/users/${id}/role`, { role }),
+  toggleActive: (id, isActive) =>
+    api.put(`/users/${id}/${isActive ? "activate" : "deactivate"}`),
+  getTechnicians: () => api.get("/users/technicians/list"),
+};
+
+// Admin Stats API
+export const adminAPI = {
+  getDashboardStats: () => api.get("/admin/dashboard"),
 };
 
 export default api;

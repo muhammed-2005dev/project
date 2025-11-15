@@ -197,7 +197,7 @@ router.put(
   "/contacts/:id/status",
   [
     body("status")
-      .isIn(["new", "read", "replied", "closed"])
+      .isIn(["new", "in-progress", "resolved", "closed"])
       .withMessage("Invalid status"),
   ],
   catchAsync(async (req, res, next) => {
