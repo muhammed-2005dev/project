@@ -9,7 +9,6 @@ const blogSchema = new mongoose.Schema({
   },
   slug: {
     type: String,
-    required: [true, 'Blog slug is required'],
     unique: true,
     lowercase: true,
     trim: true

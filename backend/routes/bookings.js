@@ -29,6 +29,58 @@ const bookingValidation = [
     .withMessage("Issue description is required"),
 ];
 
+// @desc    Get available time slots
+// @route   GET /api/bookings/available-slots
+// @access  Public
+router.get(
+  "/available-slots",
+  [query("date").isISO8601().withMessage("Valid date is required")],
+  catchAsync(async (req, res, next) => {
+    const { date } = req.query;
+    if (!date) {
+      return next(new AppError("Please provide a date (YYYY-MM-DD)", 400));
+    }
+    const appointmentDate = new Date(date);
+
+    // Define available time slots
+    const timeSlots = [
+      "08:00",
+      "09:00",
+      "10:00",
+      "11:00",
+      "12:00",
+      "13:00",
+      "14:00",
+      "15:00",
+      "16:00",
+      "17:00",
+      "18:00",
+    ];
+
+    // Get booked slots for the date
+    const bookedSlots = await Booking.find({
+      appointmentDate: {
+        $gte: new Date(appointmentDate.setHours(0, 0, 0, 0)),
+        $lt: new Date(appointmentDate.setHours(23, 59, 59, 999)),
+      },
+      status: { $in: ["pending", "confirmed", "in-progress"] },
+    }).select("appointmentTime");
+
+    const bookedTimes = bookedSlots.map((booking) => booking.appointmentTime);
+    const availableSlots = timeSlots.filter(
+      (slot) => !bookedTimes.includes(slot)
+    );
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        availableSlots,
+        bookedSlots: bookedTimes,
+      },
+    });
+  })
+);
+
 // @desc    Get all bookings
 // @route   GET /api/bookings
 // @access  Private/Admin
@@ -292,7 +344,7 @@ router.put(
       return next(new AppError("Access denied", 403));
     }
 
-    // Simplified Logic: Just update the status.
+    // Update the status
     booking.status = "cancelled";
     await booking.save();
 
@@ -370,55 +422,6 @@ router.put(
       status: "success",
       data: {
         booking,
-      },
-    });
-  })
-);
-
-// @desc    Get available time slots
-// @route   GET /api/bookings/available-slots
-// @access  Public
-router.get(
-  "/available-slots",
-  [query("date").isISO8601().withMessage("Valid date is required")],
-  catchAsync(async (req, res, next) => {
-    const { date } = req.query;
-    const appointmentDate = new Date(date);
-
-    // Define available time slots
-    const timeSlots = [
-      "08:00",
-      "09:00",
-      "10:00",
-      "11:00",
-      "12:00",
-      "13:00",
-      "14:00",
-      "15:00",
-      "16:00",
-      "17:00",
-      "18:00",
-    ];
-
-    // Get booked slots for the date
-    const bookedSlots = await Booking.find({
-      appointmentDate: {
-        $gte: new Date(appointmentDate.setHours(0, 0, 0, 0)),
-        $lt: new Date(appointmentDate.setHours(23, 59, 59, 999)),
-      },
-      status: { $in: ["pending", "confirmed", "in-progress"] },
-    }).select("appointmentTime");
-
-    const bookedTimes = bookedSlots.map((booking) => booking.appointmentTime);
-    const availableSlots = timeSlots.filter(
-      (slot) => !bookedTimes.includes(slot)
-    );
-
-    res.status(200).json({
-      status: "success",
-      data: {
-        availableSlots,
-        bookedSlots: bookedTimes,
       },
     });
   })

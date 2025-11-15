@@ -87,6 +87,10 @@ app.get("/api/health", (req, res) => {
 app.use((err, req, res, next) => {
   console.error(err.stack);
 
+  // Ensure statusCode is defined
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || "error";
+
   if (err.name === "ValidationError") {
     return res.status(400).json({
       status: "error",
@@ -109,8 +113,9 @@ app.use((err, req, res, next) => {
     });
   }
 
-  res.status(err.status || 500).json({
-    status: "error",
+  // Generic Error Response
+  res.status(err.statusCode).json({
+    status: err.status,
     message: err.message || "Internal Server Error",
   });
 });
