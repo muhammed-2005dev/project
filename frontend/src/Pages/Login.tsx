@@ -4,6 +4,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash, faCar } from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "react-hook-form";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import toast from "react-hot-toast";
 import { authAPI } from "../services/api.js";
 
@@ -44,7 +45,7 @@ const Login: React.FC = () => {
     try {
       setLoading(true);
       const response = await authAPI.login(data);
-      setUser(response.data.data.user._doc);
+      setUser(response.data.data.user);
       setToken(response.data.token);
     } catch (error) {
       console.error("Error logging in:", error);
@@ -61,8 +62,16 @@ const Login: React.FC = () => {
       }`}
     >
       {loading ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <FontAwesomeIcon
+              icon={faSpinner}
+              className="text-4xl text-yellow-500 animate-spin mb-4"
+            />
+            <p className="text-gray-600">
+              {isRTL ? "جاري التحميل..." : "Loading..."}
+            </p>
+          </div>
         </div>
       ) : (
         <div className="max-w-md w-full space-y-8">

@@ -34,14 +34,33 @@ router.get(
     query("isActive").optional().isBoolean(),
     query("page").optional().isInt({ min: 1 }),
     query("limit").optional().isInt({ min: 1, max: 100 }),
+    query("query").optional().trim(), // Allow the query parameter
   ],
   catchAsync(async (req, res, next) => {
-    const { role, isActive, page = 1, limit = 10 } = req.query;
+    // 1. Extract 'query' from the request
+    const {
+      role,
+      isActive,
+      page = 1,
+      limit = 10,
+      query: searchTerm,
+    } = req.query;
 
-    // Build filter
+    // 2. Build filter
     const filter = {};
     if (role) filter.role = role;
     if (isActive !== undefined) filter.isActive = isActive === "true";
+
+    // 3. Add Search Logic
+    // If a search term exists, add an $or condition to search name/email/phone
+    if (searchTerm) {
+      filter.$or = [
+        { firstName: { $regex: searchTerm, $options: "i" } },
+        { lastName: { $regex: searchTerm, $options: "i" } },
+        { email: { $regex: searchTerm, $options: "i" } },
+        { phone: { $regex: searchTerm, $options: "i" } },
+      ];
+    }
 
     // Pagination
     const skip = (page - 1) * limit;

@@ -1,23 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faEdit, 
-  faEye, 
+import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEdit,
   faSpinner,
   faSearch,
   faCalendar,
   faUser,
   faWrench,
-  faDollarSign,
-  faClock
-} from '@fortawesome/free-solid-svg-icons';
-import { adminApiService } from '../../services/adminApi';
-import toast from 'react-hot-toast';
+  faHardHat, // Icon for Technician
+} from "@fortawesome/free-solid-svg-icons";
+import { bookingsAPI } from "../../services/api";
+import BookingModal from "./BookingModal"; // Import the new modal
+import toast from "react-hot-toast";
 
 interface Booking {
   _id: string;
-  user: {
+  customer: {
     _id: string;
     firstName: string;
     lastName: string;
@@ -27,143 +26,196 @@ interface Booking {
   service: {
     _id: string;
     name: string;
-    nameAr: string;
     price: number;
   };
-  status: 'pending' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled';
-  scheduledDate: string;
-  totalAmount: number;
-  notes?: string;
+  technician?: {
+    // Added technician field
+    _id: string;
+    firstName: string;
+    lastName: string;
+  };
+  car: {
+    // Added car field for the modal
+    make: string;
+    model: string;
+    year: number;
+  };
+  issue: {
+    description: string;
+  };
+  status:
+    | "pending"
+    | "confirmed"
+    | "in-progress"
+    | "completed"
+    | "cancelled"
+    | "no-show";
+  appointmentDate: string;
+  appointmentTime: string;
+  estimatedCost: number;
   createdAt: string;
 }
 
 const BookingManagement: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === 'ar';
+  const isRTL = i18n.language === "ar";
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
+
+  // Search & Filter States
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // Modal States
+  const [showModal, setShowModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+
+  // Debounce Search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      if (searchTerm !== debouncedSearchTerm) {
+        setCurrentPage(1);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Load Data
   useEffect(() => {
     loadBookings();
-  }, [currentPage, statusFilter, dateFilter]);
+  }, [currentPage, statusFilter, dateFilter, debouncedSearchTerm]);
 
   const loadBookings = async () => {
     try {
       setLoading(true);
-      const params: any = { 
-        page: currentPage, 
-        limit: 10
+      const params: any = {
+        page: currentPage,
+        limit: 10,
       };
-      
+
       if (statusFilter) params.status = statusFilter;
       if (dateFilter) {
-        const today = new Date();
-        const filterDate = new Date(dateFilter);
-        params.dateFrom = filterDate.toISOString().split('T')[0];
-        params.dateTo = filterDate.toISOString().split('T')[0];
+        params.date = dateFilter;
       }
 
-      const response = await adminApiService.getBookings(params);
+      const response = await bookingsAPI.getAll(params);
       setBookings(response.data.data.bookings);
       setTotalPages(response.data.pages);
     } catch (error: any) {
-      toast.error('Failed to load bookings');
+      console.error(error);
+      toast.error("Failed to load bookings");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdateBookingStatus = async (bookingId: string, newStatus: string) => {
+  const handleUpdateBookingStatus = async (
+    bookingId: string,
+    newStatus: string
+  ) => {
     try {
-      await adminApiService.updateBookingStatus(bookingId, newStatus);
-      toast.success(isRTL ? 'تم تحديث حالة الحجز' : 'Booking status updated successfully');
-      loadBookings();
+      await bookingsAPI.updateStatus(bookingId, newStatus);
+      toast.success(
+        isRTL ? "تم تحديث حالة الحجز" : "Booking status updated successfully"
+      );
+      loadBookings(); // Reload to reflect changes
     } catch (error: any) {
-      toast.error('Failed to update booking status');
+      console.error(error);
+      toast.error("Failed to update booking status");
     }
   };
 
-  const filteredBookings = bookings.filter(booking => {
-    const matchesSearch = 
-      booking.user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.service.name.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    return matchesSearch;
+  const filteredBookings = bookings.filter((booking) => {
+    if (!debouncedSearchTerm) return true;
+    const term = debouncedSearchTerm.toLowerCase();
+
+    return (
+      (booking.customer?.firstName?.toLowerCase() || "").includes(term) ||
+      (booking.customer?.lastName?.toLowerCase() || "").includes(term) ||
+      (booking.service?.name?.toLowerCase() || "").includes(term)
+    );
   });
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'confirmed': return 'bg-blue-100 text-blue-800';
-      case 'in-progress': return 'bg-purple-100 text-purple-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "confirmed":
+        return "bg-blue-100 text-blue-800";
+      case "in-progress":
+        return "bg-purple-100 text-purple-800";
+      case "completed":
+        return "bg-green-100 text-green-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      case "no-show":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusText = (status: string) => {
-    const statusMap: { [key: string]: { en: string; ar: string } } = {
-      'pending': { en: 'Pending', ar: 'في الانتظار' },
-      'confirmed': { en: 'Confirmed', ar: 'مؤكد' },
-      'in-progress': { en: 'In Progress', ar: 'قيد التنفيذ' },
-      'completed': { en: 'Completed', ar: 'مكتمل' },
-      'cancelled': { en: 'Cancelled', ar: 'ملغي' }
-    };
-    return isRTL ? statusMap[status]?.ar : statusMap[status]?.en;
+    return status.charAt(0).toUpperCase() + status.slice(1);
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <FontAwesomeIcon icon={faSpinner} className="text-4xl text-yellow-500 animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">
-          {isRTL ? 'إدارة الحجوزات' : 'Bookings Management'}
+          {isRTL ? "إدارة الحجوزات" : "Bookings Management"}
         </h2>
       </div>
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Search */}
           <div className="relative">
-            <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-3 text-gray-400" />
+            <div className="absolute left-3 top-3 text-gray-400">
+              {loading ? (
+                <FontAwesomeIcon
+                  icon={faSpinner}
+                  className="animate-spin text-yellow-500"
+                />
+              ) : (
+                <FontAwesomeIcon icon={faSearch} />
+              )}
+            </div>
             <input
               type="text"
-              placeholder={isRTL ? 'البحث في الحجوزات...' : 'Search bookings...'}
+              placeholder={
+                isRTL ? "البحث في الحجوزات..." : "Search bookings..."
+              }
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
             />
           </div>
-          
+
+          {/* Status */}
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent cursor-pointer"
           >
-            <option value="">{isRTL ? 'جميع الحالات' : 'All Status'}</option>
-            <option value="pending">{isRTL ? 'في الانتظار' : 'Pending'}</option>
-            <option value="confirmed">{isRTL ? 'مؤكد' : 'Confirmed'}</option>
-            <option value="in-progress">{isRTL ? 'قيد التنفيذ' : 'In Progress'}</option>
-            <option value="completed">{isRTL ? 'مكتمل' : 'Completed'}</option>
-            <option value="cancelled">{isRTL ? 'ملغي' : 'Cancelled'}</option>
+            <option value="">{isRTL ? "جميع الحالات" : "All Status"}</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="no-show">No Show</option>
           </select>
 
+          {/* Date */}
           <input
             type="date"
             value={dateFilter}
@@ -174,136 +226,135 @@ const BookingManagement: React.FC = () => {
       </div>
 
       {/* Bookings List */}
-      <div className="space-y-4">
+      <div
+        className={`space-y-4 transition-opacity duration-200 ${
+          loading ? "opacity-50" : "opacity-100"
+        }`}
+      >
         {filteredBookings.map((booking) => (
           <div key={booking._id} className="bg-white rounded-lg shadow-lg p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {/* Customer Info */}
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0 h-12 w-12">
-                  <div className="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center">
-                    <FontAwesomeIcon icon={faUser} className="text-white" />
-                  </div>
+            <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
+              {/* 1. Customer & Service */}
+              <div className="flex flex-col gap-1 min-w-[200px] flex-1">
+                <div className="flex items-center gap-2 font-semibold text-slate-800">
+                  <FontAwesomeIcon icon={faUser} className="text-blue-500" />
+                  {booking.customer?.firstName} {booking.customer?.lastName}
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {booking.user.firstName} {booking.user.lastName}
-                  </h3>
-                  <p className="text-gray-600">{booking.user.email}</p>
-                  {booking.user.phone && (
-                    <p className="text-sm text-gray-500">{booking.user.phone}</p>
-                  )}
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <FontAwesomeIcon icon={faWrench} className="text-green-500" />
+                  {booking.service?.name || "Service Deleted"}
+                </div>
+                {booking.technician && (
+                  <div className="flex items-center gap-2 text-xs text-purple-600 mt-1 bg-purple-50 w-fit px-2 py-1 rounded">
+                    <FontAwesomeIcon icon={faHardHat} />
+                    Tech: {booking.technician.firstName}
+                  </div>
+                )}
+              </div>
+
+              {/* 2. Date & Cost */}
+              <div className="flex flex-col gap-1 min-w-[150px]">
+                <div className="flex items-center gap-2 text-gray-700">
+                  <FontAwesomeIcon
+                    icon={faCalendar}
+                    className="text-gray-400"
+                  />
+                  {new Date(booking.appointmentDate).toLocaleDateString()}
+                </div>
+                <div className="text-sm text-gray-500 pl-6">
+                  {booking.appointmentTime}
+                </div>
+                <div className="text-sm font-bold text-yellow-600 pl-6">
+                  ${booking.estimatedCost}
                 </div>
               </div>
 
-              {/* Service Info */}
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0 h-12 w-12">
-                  <div className="h-12 w-12 rounded-full bg-green-500 flex items-center justify-center">
-                    <FontAwesomeIcon icon={faWrench} className="text-white" />
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">
-                    {isRTL ? booking.service.nameAr : booking.service.name}
-                  </h4>
-                  <p className="text-yellow-600 font-bold">${booking.service.price}</p>
-                </div>
-              </div>
+              {/* 3. Status & Actions */}
+              <div className="flex flex-col items-start gap-3 min-w-35">
+                <div className="flex items-center gap-2">
+                  {/* Manage Button */}
+                  <button
+                    onClick={() => {
+                      setSelectedBooking(booking);
+                      setShowModal(true);
+                    }}
+                    className="text-blue-600 hover:text-blue-800 bg-blue-50 size-7.5 rounded-full hover:bg-blue-100 transition-colors cursor-pointer"
+                    title={isRTL ? "إدارة الحجز" : "Manage Booking"}
+                  >
+                    <FontAwesomeIcon icon={faEdit} />{" "}
+                  </button>
 
-              {/* Date & Time */}
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0 h-12 w-12">
-                  <div className="h-12 w-12 rounded-full bg-purple-500 flex items-center justify-center">
-                    <FontAwesomeIcon icon={faCalendar} className="text-white" />
-                  </div>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">
-                    {new Date(booking.scheduledDate).toLocaleDateString()}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(booking.scheduledDate).toLocaleTimeString()}
-                  </p>
-                </div>
-              </div>
-
-              {/* Status & Actions */}
-              <div className="flex flex-col justify-between">
-                <div className="flex items-center justify-between mb-2">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(booking.status)}`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                      booking.status
+                    )}`}
+                  >
                     {getStatusText(booking.status)}
                   </span>
-                  <span className="text-lg font-bold text-green-600">
-                    ${booking.totalAmount}
-                  </span>
                 </div>
-                
-                <div className="flex items-center gap-2">
-                  <button className="text-blue-600 hover:text-blue-800">
-                    <FontAwesomeIcon icon={faEye} />
-                  </button>
-                  <button className="text-green-600 hover:text-green-800">
-                    <FontAwesomeIcon icon={faEdit} />
-                  </button>
-                  <select
-                    value={booking.status}
-                    onChange={(e) => handleUpdateBookingStatus(booking._id, e.target.value)}
-                    className="text-xs border border-gray-300 rounded px-2 py-1"
-                  >
-                    <option value="pending">{isRTL ? 'في الانتظار' : 'Pending'}</option>
-                    <option value="confirmed">{isRTL ? 'مؤكد' : 'Confirmed'}</option>
-                    <option value="in-progress">{isRTL ? 'قيد التنفيذ' : 'In Progress'}</option>
-                    <option value="completed">{isRTL ? 'مكتمل' : 'Completed'}</option>
-                    <option value="cancelled">{isRTL ? 'ملغي' : 'Cancelled'}</option>
-                  </select>
-                </div>
+
+                <select
+                  value={booking.status}
+                  onChange={(e) =>
+                    handleUpdateBookingStatus(booking._id, e.target.value)
+                  }
+                  className="w-full text-sm border border-gray-300 rounded-md px-2 py-1 bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="no-show">No Show</option>
+                </select>
               </div>
             </div>
-
-            {booking.notes && (
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <p className="text-sm text-gray-600">
-                  <strong>{isRTL ? 'ملاحظات:' : 'Notes:'}</strong> {booking.notes}
-                </p>
-              </div>
-            )}
           </div>
         ))}
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2">
+        <div className="flex justify-center items-center gap-2 pt-4">
           <button
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
-            className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
           >
-            {isRTL ? 'السابق' : 'Previous'}
+            {isRTL ? "السابق" : "Previous"}
           </button>
-          
+
           <span className="px-4 py-2 text-gray-600">
             {currentPage} / {totalPages}
           </span>
-          
+
           <button
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
-            className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
           >
-            {isRTL ? 'التالي' : 'Next'}
+            {isRTL ? "التالي" : "Next"}
           </button>
         </div>
       )}
 
-      {filteredBookings.length === 0 && (
+      {bookings.length === 0 && !loading && (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">
-            {isRTL ? 'لا توجد حجوزات' : 'No bookings found'}
+            {isRTL ? "لا توجد حجوزات" : "No bookings found"}
           </p>
         </div>
       )}
+
+      {/* Detail Modal */}
+      <BookingModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSuccess={loadBookings} // Reloads list after assigning technician
+        booking={selectedBooking}
+      />
     </div>
   );
 };

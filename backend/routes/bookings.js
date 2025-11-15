@@ -387,6 +387,48 @@ router.put(
   })
 );
 
+// @desc    Update booking status
+// @route   PUT /api/bookings/:id/status
+// @access  Private/Admin
+router.put(
+  "/:id/status",
+  protect,
+  authorize("admin"),
+  [
+    body("status")
+      .isIn([
+        "pending",
+        "confirmed",
+        "in-progress",
+        "completed",
+        "cancelled",
+        "no-show",
+      ])
+      .withMessage("Invalid status"),
+  ],
+  catchAsync(async (req, res, next) => {
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return next(new AppError("Booking not found", 404));
+    }
+
+    booking.status = req.body.status;
+    await booking.save();
+
+    // Populate so the frontend gets the names back immediately
+    await booking.populate("customer", "firstName lastName email phone");
+    await booking.populate("service", "name price");
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        booking,
+      },
+    });
+  })
+);
+
 // @desc    Assign technician to booking
 // @route   PUT /api/bookings/:id/assign
 // @access  Private/Admin

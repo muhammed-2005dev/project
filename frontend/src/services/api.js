@@ -136,9 +136,10 @@ export const usersAPI = {
   getTechnicians: () => api.get("/users/technicians/list"),
 };
 
-// Admin Stats API
+// Admin Stats & Health API
 export const adminAPI = {
   getDashboardStats: () => api.get("/admin/dashboard"),
+  getSystemHealth: () => api.get("/admin/health"),
 };
 
 export default api;
