@@ -6,10 +6,11 @@ import {
   faPhone,
   faEnvelope,
   faClock,
+  faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { contactAPI } from "../services/api.js";
+import { contactAPI } from "../services/api";
 
 interface ContactForm {
   name: string;
@@ -21,6 +22,8 @@ interface ContactForm {
 const Contact: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
+  const [loading, setLoading] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -28,19 +31,21 @@ const Contact: React.FC = () => {
     formState: { errors },
   } = useForm<ContactForm>();
 
-  const onSubmit = (data: ContactForm) => {
-    console.log("Contact form data:", data);
-    toast.success(t("common.success"));
-    sendMessage(data);
-    reset();
-  };
-
-  const sendMessage = (data: ContactForm) => {
+  const onSubmit = async (data: ContactForm) => {
     try {
-      contactAPI.sendMessage(data);
-    } catch (error) {
+      setLoading(true);
+
+      // Call the new API
+      await contactAPI.sendMessage(data);
+
+      toast.success(t("common.success") || "Message sent successfully");
+      reset();
+    } catch (error: any) {
       console.error("Error sending message:", error);
-      toast.error("Failed to send message");
+      const msg = error.response?.data?.message || "Failed to send message";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,7 +65,7 @@ const Contact: React.FC = () => {
     {
       icon: faEnvelope,
       title: t("contact.emailAddress"),
-      details: "info@example.com",
+      details: "info@autologic.com",
     },
     {
       icon: faClock,
@@ -107,12 +112,12 @@ const Contact: React.FC = () => {
                   <input
                     type="text"
                     {...register("name", {
-                      required: t("contact.nameRequired"),
+                      required: t("contact.nameRequired") || "Name is required",
                     })}
                     className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
                       isRTL ? "text-right" : "text-left"
                     }`}
-                    placeholder={t("contact.name")}
+                    placeholder={t("contact.name") || "Name"}
                   />
                   {errors.name && (
                     <p className="text-red-500 text-sm mt-1">
@@ -128,16 +133,17 @@ const Contact: React.FC = () => {
                   <input
                     type="email"
                     {...register("email", {
-                      required: t("contact.emailRequired"),
+                      required:
+                        t("contact.emailRequired") || "Email is required",
                       pattern: {
                         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                        message: t("contact.emailInvalid"),
+                        message: t("contact.emailInvalid") || "Invalid email",
                       },
                     })}
                     className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
                       isRTL ? "text-right" : "text-left"
                     }`}
-                    placeholder={t("contact.email")}
+                    placeholder={t("contact.email") || "Email"}
                   />
                   {errors.email && (
                     <p className="text-red-500 text-sm mt-1">
@@ -153,12 +159,13 @@ const Contact: React.FC = () => {
                   <input
                     type="tel"
                     {...register("phone", {
-                      required: t("contact.phoneRequired"),
+                      required:
+                        t("contact.phoneRequired") || "Phone is required",
                     })}
                     className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
                       isRTL ? "text-right" : "text-left"
                     }`}
-                    placeholder={t("contact.phone")}
+                    placeholder={t("contact.phone") || "Phone"}
                   />
                   {errors.phone && (
                     <p className="text-red-500 text-sm mt-1">
@@ -173,13 +180,14 @@ const Contact: React.FC = () => {
                   </label>
                   <textarea
                     {...register("message", {
-                      required: t("contact.messageRequired"),
+                      required:
+                        t("contact.messageRequired") || "Message is required",
                     })}
                     rows={5}
                     className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
                       isRTL ? "text-right" : "text-left"
                     }`}
-                    placeholder={t("contact.message")}
+                    placeholder={t("contact.message") || "Message"}
                   />
                   {errors.message && (
                     <p className="text-red-500 text-sm mt-1">
@@ -190,8 +198,15 @@ const Contact: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="w-full bg-yellow-500 text-white py-3 px-6 rounded-lg font-medium hover:bg-yellow-600 transition-colors"
+                  disabled={loading}
+                  className="w-full bg-yellow-500 text-white py-3 px-6 rounded-lg font-medium hover:bg-yellow-600 transition-colors disabled:opacity-50 flex justify-center items-center gap-2 cursor-pointer"
                 >
+                  {loading && (
+                    <FontAwesomeIcon
+                      icon={faSpinner}
+                      className="animate-spin"
+                    />
+                  )}
                   {t("contact.send")}
                 </button>
               </form>
@@ -227,7 +242,7 @@ const Contact: React.FC = () => {
                 </div>
               </div>
 
-              {/* Map */}
+              {/* Map (Static Placeholder) */}
               <div className="bg-white rounded-lg shadow-lg p-8">
                 <h2
                   className={`text-2xl font-bold text-slate-800 mb-6 ${

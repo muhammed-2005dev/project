@@ -1,325 +1,472 @@
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendar, faClock, faUser, faPhone, faEnvelope, faCar } from '@fortawesome/free-solid-svg-icons';
-import { useForm } from 'react-hook-form';
-import DatePicker from 'react-datepicker';
-import toast from 'react-hot-toast';
-import 'react-datepicker/dist/react-datepicker.css';
+import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCalendar,
+  faClock,
+  faUser,
+  faPhone,
+  faEnvelope,
+  faCar,
+  faWrench,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
+import { useForm } from "react-hook-form";
+import DatePicker from "react-datepicker";
+import { useNavigate, useLocation } from "react-router-dom";
+import toast from "react-hot-toast";
+import "react-datepicker/dist/react-datepicker.css";
+import { servicesAPI, bookingsAPI } from "../services/api";
 
 interface AppointmentForm {
   service: string;
-  name: string;
-  phone: string;
-  email: string;
-  message: string;
+  appointmentTime: string;
+  carMake: string;
+  carModel: string;
+  carYear: number;
+  description: string;
 }
 
 const MakeAppointment: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === 'ar';
+  const isRTL = i18n.language === "ar";
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Auth Check
+  const userJson = localStorage.getItem("user");
+  const user = userJson ? JSON.parse(userJson) : null;
+
+  const [services, setServices] = useState<any[]>([]);
+  const [timeSlots, setTimeSlots] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string>('');
-  const { register, handleSubmit, formState: { errors } } = useForm<AppointmentForm>();
+  const [loading, setLoading] = useState(false);
+  const [slotsLoading, setSlotsLoading] = useState(false);
 
-  const services = isRTL ? [
-    'فحص شامل للمحرك',
-    'تغيير الزيت والفلتر',
-    'فحص وإصلاح المكابح',
-    'فحص وتغيير الإطارات',
-    'فحص وتغيير البطارية',
-    'فحص نظام التكييف',
-    'تشخيص الأعطال',
-    'صيانة دورية شاملة',
-    'خدمة طوارئ',
-    'خدمة أخرى'
-  ] : [
-    'Complete Engine Inspection',
-    'Oil and Filter Change',
-    'Brake Inspection and Repair',
-    'Tire Inspection and Change',
-    'Battery Inspection and Change',
-    'Air Conditioning System Check',
-    'Fault Diagnosis',
-    'Comprehensive Periodic Maintenance',
-    'Emergency Service',
-    'Other Service'
-  ];
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<AppointmentForm>();
 
-  const timeSlots = isRTL ? [
-    '08:00 ص',
-    '09:00 ص',
-    '10:00 ص',
-    '11:00 ص',
-    '12:00 م',
-    '01:00 م',
-    '02:00 م',
-    '03:00 م',
-    '04:00 م',
-    '05:00 م',
-    '06:00 م'
-  ] : [
-    '08:00 AM',
-    '09:00 AM',
-    '10:00 AM',
-    '11:00 AM',
-    '12:00 PM',
-    '01:00 PM',
-    '02:00 PM',
-    '03:00 PM',
-    '04:00 PM',
-    '05:00 PM',
-    '06:00 PM'
-  ];
+  // 1. FIX: Run ONCE on mount
+  useEffect(() => {
+    const checkAuthAndLoad = async () => {
+      const userJson = localStorage.getItem("user");
 
-  const onSubmit = (data: AppointmentForm) => {
-    if (!selectedDate || !selectedTime) {
-      toast.error(isRTL ? 'يرجى اختيار التاريخ والوقت' : 'Please select date and time');
+      if (!userJson) {
+        toast.error("Please login to make an appointment");
+        navigate("/login");
+        return;
+      }
+
+      // If auth is good, load data
+      await loadServices();
+    };
+
+    checkAuthAndLoad();
+  }, []); // Empty dependency array stops the loop
+
+  // 2. Fetch Services
+  const loadServices = async () => {
+    try {
+      const response = await servicesAPI.getAll({ limit: 100 });
+      setServices(response.data.data.services);
+
+      // Check if a service was pre-selected from the Services page
+      if (location.state?.selectedServiceId) {
+        setValue("service", location.state.selectedServiceId);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load services");
+    }
+  };
+
+  // 3. Fetch Available Slots when Date Changes
+  useEffect(() => {
+    if (selectedDate) {
+      loadAvailableSlots(selectedDate);
+    } else {
+      setTimeSlots([]);
+    }
+  }, [selectedDate]);
+
+  const loadAvailableSlots = async (date: Date) => {
+    try {
+      setSlotsLoading(true);
+      // Format date as YYYY-MM-DD manually to avoid timezone issues
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const dateString = `${year}-${month}-${day}`;
+
+      const response = await bookingsAPI.getAvailableSlots(dateString);
+      setTimeSlots(response.data.data.availableSlots);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load time slots");
+    } finally {
+      setSlotsLoading(false);
+    }
+  };
+
+  const onSubmit = async (data: AppointmentForm) => {
+    if (!selectedDate) {
+      toast.error(isRTL ? "يرجى اختيار التاريخ" : "Please select a date");
       return;
     }
-    
-    console.log('Appointment data:', {
-      ...data,
-      date: selectedDate,
-      time: selectedTime
-    });
-    toast.success(isRTL ? 'تم حجز الموعد بنجاح' : 'Appointment booked successfully');
+
+    try {
+      setLoading(true);
+
+      // Construct payload matching backend Booking model
+      const payload = {
+        service: data.service,
+        appointmentDate: selectedDate,
+        appointmentTime: data.appointmentTime,
+        car: {
+          make: data.carMake,
+          model: data.carModel,
+          year: data.carYear,
+        },
+        issue: {
+          description: data.description,
+        },
+      };
+
+      await bookingsAPI.create(payload);
+
+      toast.success(
+        isRTL ? "تم حجز الموعد بنجاح" : "Appointment booked successfully"
+      );
+      navigate("/dashboard"); // Send them to their dashboard to see the booking
+    } catch (error: any) {
+      console.error(error);
+      const msg = error.response?.data?.message || "Failed to create booking";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className={`min-h-screen bg-gray-50 ${isRTL ? 'rtl' : 'ltr'}`}>
+    <div className={`min-h-screen bg-gray-50 ${isRTL ? "rtl" : "ltr"}`}>
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">{t('appointment.title')}</h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">{t('appointment.subtitle')}</p>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              {t("appointment.title")}
+            </h1>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              {t("appointment.subtitle")}
+            </p>
           </div>
         </div>
       </div>
 
       <div className="py-16">
-        <div className="max-w-4xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Appointment Form */}
+            {/* Main Form */}
             <div className="lg:col-span-2">
               <div className="bg-white rounded-lg shadow-lg p-8">
-                <h2 className={`text-2xl font-bold text-slate-800 mb-6 ${isRTL ? 'text-right' : 'text-left'}`}>
-                  {isRTL ? 'معلومات الحجز' : 'Booking Information'}
+                <h2
+                  className={`text-2xl font-bold text-slate-800 mb-6 ${
+                    isRTL ? "text-right" : "text-left"
+                  }`}
+                >
+                  {isRTL ? "معلومات الحجز" : "Booking Information"}
                 </h2>
-                
+
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  {/* Service Selection */}
+                  {/* 1. Service Selection */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      <FontAwesomeIcon icon={faCar} className="mr-2" />
-                      {t('appointment.service')}
+                      <FontAwesomeIcon icon={faWrench} className="mr-2" />
+                      {t("appointment.service")}
                     </label>
                     <select
-                      {...register('service', { required: isRTL ? 'يرجى اختيار الخدمة' : 'Please select a service' })}
-                      className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${isRTL ? 'text-right' : 'text-left'}`}
+                      {...register("service", {
+                        required: isRTL
+                          ? "يرجى اختيار الخدمة"
+                          : "Please select a service",
+                      })}
+                      className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                        isRTL ? "text-right" : "text-left"
+                      } cursor-pointer`}
                     >
-                      <option value="">{isRTL ? 'اختر الخدمة المطلوبة' : 'Choose the required service'}</option>
-                      {services.map((service, index) => (
-                        <option key={index} value={service}>{service}</option>
+                      <option value="">
+                        {isRTL
+                          ? "اختر الخدمة المطلوبة"
+                          : "Choose the required service"}
+                      </option>
+                      {services.map((service) => (
+                        <option key={service._id} value={service._id}>
+                          {service.name} (${service.price})
+                        </option>
                       ))}
                     </select>
                     {errors.service && (
-                      <p className="text-red-500 text-sm mt-1">{errors.service.message}</p>
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.service.message}
+                      </p>
                     )}
                   </div>
 
-                  {/* Date and Time Selection */}
+                  {/* 2. Car Information (New Section) */}
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h3 className="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                      <FontAwesomeIcon icon={faCar} /> Vehicle Details
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs text-gray-500 uppercase mb-1">
+                          Make
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Toyota"
+                          {...register("carMake", {
+                            required: "Make is required",
+                          })}
+                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                        />
+                        {errors.carMake && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.carMake.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 uppercase mb-1">
+                          Model
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Corolla"
+                          {...register("carModel", {
+                            required: "Model is required",
+                          })}
+                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                        />
+                        {errors.carModel && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.carModel.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 uppercase mb-1">
+                          Year
+                        </label>
+                        <input
+                          type="number"
+                          placeholder="2020"
+                          {...register("carYear", {
+                            required: "Year is required",
+                            min: { value: 1900, message: "Invalid year" },
+                            max: {
+                              value: new Date().getFullYear() + 1,
+                              message: "Invalid year",
+                            },
+                          })}
+                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                        />
+                        {errors.carYear && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.carYear.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. Date and Time */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <FontAwesomeIcon icon={faCalendar} className="mr-2" />
-                        {t('appointment.date')}
+                        {t("appointment.date")}
                       </label>
                       <DatePicker
                         selected={selectedDate}
                         onChange={(date) => setSelectedDate(date)}
                         minDate={new Date()}
-                        maxDate={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)} // 30 days from now
+                        maxDate={
+                          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                        }
                         dateFormat="dd/MM/yyyy"
-                        className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${isRTL ? 'text-right' : 'text-left'}`}
-                        placeholderText={isRTL ? 'اختر التاريخ' : 'Choose date'}
-                        excludeDates={[new Date()]} // Exclude today
+                        className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                          isRTL ? "text-right" : "text-left"
+                        }`}
+                        placeholderText={isRTL ? "اختر التاريخ" : "Choose date"}
+                        wrapperClassName="w-full"
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <FontAwesomeIcon icon={faClock} className="mr-2" />
-                        {t('appointment.time')}
+                        {t("appointment.time")}
+                        {slotsLoading && (
+                          <FontAwesomeIcon
+                            icon={faSpinner}
+                            className="animate-spin ml-2 text-yellow-500"
+                          />
+                        )}
                       </label>
                       <select
-                        value={selectedTime}
-                        onChange={(e) => setSelectedTime(e.target.value)}
-                        className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${isRTL ? 'text-right' : 'text-left'}`}
+                        {...register("appointmentTime", {
+                          required: isRTL
+                            ? "يرجى اختيار الوقت"
+                            : "Please select a time",
+                        })}
+                        disabled={!selectedDate || slotsLoading}
+                        className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent disabled:bg-gray-100 ${
+                          isRTL ? "text-right" : "text-left"
+                        } cursor-pointer`}
                       >
-                        <option value="">{isRTL ? 'اختر الوقت' : 'Choose time'}</option>
+                        <option value="">
+                          {isRTL ? "اختر الوقت" : "Choose time"}
+                        </option>
                         {timeSlots.map((time, index) => (
-                          <option key={index} value={time}>{time}</option>
+                          <option key={index} value={time}>
+                            {time}
+                          </option>
                         ))}
                       </select>
-                    </div>
-                  </div>
-
-                  {/* Personal Information */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <FontAwesomeIcon icon={faUser} className="mr-2" />
-                        {t('appointment.name')}
-                      </label>
-                      <input
-                        type="text"
-                        {...register('name', { required: isRTL ? 'الاسم مطلوب' : 'Name is required' })}
-                        className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${isRTL ? 'text-right' : 'text-left'}`}
-                        placeholder={t('appointment.name')}
-                      />
-                      {errors.name && (
-                        <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+                      {errors.appointmentTime && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.appointmentTime.message}
+                        </p>
                       )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <FontAwesomeIcon icon={faPhone} className="mr-2" />
-                        {t('appointment.phone')}
-                      </label>
-                      <input
-                        type="tel"
-                        {...register('phone', { 
-                          required: isRTL ? 'رقم الهاتف مطلوب' : 'Phone number is required',
-                          pattern: {
-                            value: /^[0-9+\-\s()]+$/,
-                            message: isRTL ? 'رقم الهاتف غير صحيح' : 'Invalid phone number'
-                          }
-                        })}
-                        className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${isRTL ? 'text-right' : 'text-left'}`}
-                        placeholder={t('appointment.phone')}
-                      />
-                      {errors.phone && (
-                        <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
+                      {!selectedDate && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Select a date first to see available times.
+                        </p>
                       )}
                     </div>
                   </div>
 
+                  {/* 4. Issue Description */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      <FontAwesomeIcon icon={faEnvelope} className="mr-2" />
-                      {t('appointment.email')}
-                    </label>
-                    <input
-                      type="email"
-                      {...register('email', { 
-                        required: isRTL ? 'البريد الإلكتروني مطلوب' : 'Email is required',
-                        pattern: {
-                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                          message: isRTL ? 'البريد الإلكتروني غير صحيح' : 'Invalid email address'
-                        }
-                      })}
-                      className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${isRTL ? 'text-right' : 'text-left'}`}
-                      placeholder={t('appointment.email')}
-                    />
-                    {errors.email && (
-                      <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('appointment.message')}
+                      {t("appointment.message")} / Issue Description
                     </label>
                     <textarea
-                      {...register('message')}
+                      {...register("description", {
+                        required: "Description is required",
+                      })}
                       rows={4}
-                      className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${isRTL ? 'text-right' : 'text-left'}`}
-                      placeholder={t('appointment.message')}
+                      className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                        isRTL ? "text-right" : "text-left"
+                      }`}
+                      placeholder="Describe the problem with your car..."
                     />
+                    {errors.description && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.description.message}
+                      </p>
+                    )}
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full bg-yellow-500 text-white py-3 px-6 rounded-lg font-medium hover:bg-yellow-600 transition-colors"
+                    disabled={loading}
+                    className="w-full bg-yellow-500 text-white py-3 px-6 rounded-lg font-medium hover:bg-yellow-600 transition-colors disabled:opacity-50 flex justify-center items-center gap-2 cursor-pointer"
                   >
-                    {t('appointment.book')}
+                    {loading && (
+                      <FontAwesomeIcon
+                        icon={faSpinner}
+                        className="animate-spin"
+                      />
+                    )}
+                    {t("appointment.book")}
                   </button>
                 </form>
               </div>
             </div>
 
-            {/* Sidebar */}
+            {/* Sidebar: User Info (Read-Only) & Contact */}
             <div className="space-y-6">
-              {/* Contact Info */}
+              {/* Logged In User Info */}
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-6">
+                <h3 className="text-lg font-bold text-blue-800 mb-4 flex items-center gap-2">
+                  <FontAwesomeIcon icon={faUser} /> Your Information
+                </h3>
+                <div className="space-y-3 text-sm">
+                  <p className="flex justify-between border-b border-blue-100 pb-2">
+                    <span className="text-blue-600">Name:</span>
+                    <span className="font-medium text-slate-700">
+                      {user?.firstName} {user?.lastName}
+                    </span>
+                  </p>
+                  <p className="flex justify-between border-b border-blue-100 pb-2">
+                    <span className="text-blue-600">Email:</span>
+                    <span className="font-medium text-slate-700">
+                      {user?.email}
+                    </span>
+                  </p>
+                  <p className="flex justify-between">
+                    <span className="text-blue-600">Phone:</span>
+                    <span className="font-medium text-slate-700">
+                      {user?.phone || "N/A"}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Contact Info (Static) */}
               <div className="bg-white rounded-lg shadow-lg p-6">
-                <h3 className={`text-lg font-bold text-slate-800 mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-                  {isRTL ? 'معلومات الاتصال' : 'Contact Information'}
+                <h3
+                  className={`text-lg font-bold text-slate-800 mb-4 ${
+                    isRTL ? "text-right" : "text-left"
+                  }`}
+                >
+                  {isRTL ? "معلومات الاتصال" : "Shop Contact Info"}
                 </h3>
                 <div className="space-y-3">
-                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <FontAwesomeIcon icon={faPhone} className="text-yellow-500" />
+                  <div
+                    className={`flex items-center gap-3 ${
+                      isRTL ? "flex-row-reverse" : ""
+                    }`}
+                  >
+                    <FontAwesomeIcon
+                      icon={faPhone}
+                      className="text-yellow-500"
+                    />
                     <span className="text-gray-700">888 123-4587</span>
                   </div>
-                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <FontAwesomeIcon icon={faEnvelope} className="text-yellow-500" />
-                    <span className="text-gray-700">info@example.com</span>
+                  <div
+                    className={`flex items-center gap-3 ${
+                      isRTL ? "flex-row-reverse" : ""
+                    }`}
+                  >
+                    <FontAwesomeIcon
+                      icon={faEnvelope}
+                      className="text-yellow-500"
+                    />
+                    <span className="text-gray-700">info@autologic.com</span>
                   </div>
-                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <FontAwesomeIcon icon={faClock} className="text-yellow-500" />
+                  <div
+                    className={`flex items-center gap-3 ${
+                      isRTL ? "flex-row-reverse" : ""
+                    }`}
+                  >
+                    <FontAwesomeIcon
+                      icon={faClock}
+                      className="text-yellow-500"
+                    />
                     <span className="text-gray-700">
-                      {isRTL ? 'الاثنين - الجمعة: 8:00 ص - 6:00 م' : 'Monday - Friday: 8:00 AM - 6:00 PM'}
+                      {isRTL
+                        ? "الاثنين - الجمعة: 8:00 ص - 6:00 م"
+                        : "Mon - Fri: 8:00 AM - 6:00 PM"}
                     </span>
                   </div>
-                </div>
-              </div>
-
-              {/* Working Hours */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h3 className={`text-lg font-bold text-slate-800 mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-                  {isRTL ? 'ساعات العمل' : 'Working Hours'}
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <span className="text-gray-600">
-                      {isRTL ? 'الاثنين - الجمعة' : 'Monday - Friday'}
-                    </span>
-                    <span className="text-gray-800">
-                      {isRTL ? '8:00 ص - 6:00 م' : '8:00 AM - 6:00 PM'}
-                    </span>
-                  </div>
-                  <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <span className="text-gray-600">
-                      {isRTL ? 'السبت' : 'Saturday'}
-                    </span>
-                    <span className="text-gray-800">
-                      {isRTL ? '9:00 ص - 4:00 م' : '9:00 AM - 4:00 PM'}
-                    </span>
-                  </div>
-                  <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <span className="text-gray-600">
-                      {isRTL ? 'الأحد' : 'Sunday'}
-                    </span>
-                    <span className="text-gray-800">
-                      {isRTL ? 'مغلق' : 'Closed'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Emergency Contact */}
-              <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                <h3 className={`text-lg font-bold text-red-800 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
-                  {isRTL ? 'خدمة الطوارئ' : 'Emergency Service'}
-                </h3>
-                <p className={`text-red-700 text-sm mb-3 ${isRTL ? 'text-right' : 'text-left'}`}>
-                  {isRTL ? 'للطوارئ خارج ساعات العمل' : 'For emergencies outside working hours'}
-                </p>
-                <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <FontAwesomeIcon icon={faPhone} className="text-red-600" />
-                  <span className="text-red-800 font-semibold">999 123-4567</span>
                 </div>
               </div>
             </div>
