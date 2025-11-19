@@ -1,17 +1,35 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationDot, faPhone, faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { faFacebookF, faTwitter, faInstagram, faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { useTranslation } from 'react-i18next';
-
-import img1 from '../Footer/img-1.58cb2030.jpg';
-import img2 from '../Footer/img-2.852abb49.jpg';
+import { blogAPI, servicesAPI } from '../../services/api';
 
 const Footer: React.FC = () => {
     const { t, i18n } = useTranslation();
     const isRTL = i18n.language === 'ar';
-    
+
+    const [recentPosts, setRecentPosts] = useState<any[]>([]);
+    const [services, setServices] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch 2 recent blogs
+                const blogsRes = await blogAPI.getAll({ limit: 2 });
+                setRecentPosts(blogsRes.data.data.posts);
+
+                // Fetch 6 services
+                const servicesRes = await servicesAPI.getAll({ limit: 6 });
+                setServices(servicesRes.data.data.services);
+            } catch (error) {
+                console.error("Failed to load footer data", error);
+            }
+        };
+        fetchData();
+    }, []);
+
     return (
         <footer className={`w-full bg-slate-900 text-gray-300 pt-16 pb-9 ${isRTL ? 'rtl' : 'ltr'}`}>
             <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -24,57 +42,50 @@ const Footer: React.FC = () => {
                     </p>
 
                     <div className="flex gap-3 mt-5">
-                        <a href="https://facebook.com" target="_blank" className="hover:text-yellow-500 transition-colors">
+                        <a href="https://facebook.com" target="_blank" rel="noreferrer" className="hover:text-yellow-500 transition-colors">
                             <FontAwesomeIcon icon={faFacebookF} />
                         </a>
-
-                        <a href="https://twitter.com" target="_blank" className="hover:text-yellow-500 transition-colors">
+                        <a href="https://twitter.com" target="_blank" rel="noreferrer" className="hover:text-yellow-500 transition-colors">
                             <FontAwesomeIcon icon={faTwitter} />
                         </a>
-
-                        <a href="https://instagram.com" target="_blank" className="hover:text-yellow-500 transition-colors">
+                        <a href="https://instagram.com" target="_blank" rel="noreferrer" className="hover:text-yellow-500 transition-colors">
                             <FontAwesomeIcon icon={faInstagram} />
                         </a>
-
-                        <a href="https://google.com" target="_blank" className="hover:text-yellow-500 transition-colors">
+                        <a href="https://google.com" target="_blank" rel="noreferrer" className="hover:text-yellow-500 transition-colors">
                             <FontAwesomeIcon icon={faGoogle} />
                         </a>
                     </div>
                 </div>
 
-                {/* Second Column : Recent posts (with date and image) */}
+                {/* Second Column : Recent posts (Dynamic) */}
                 <div>
                     <h3 className="text-lg font-semibold text-white mb-4">{t('footer.recentPosts')}</h3>
 
-                    {/* First Post */}
-                    <div className={`flex gap-3 mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <img src={img1} alt={isRTL ? 'منشور حديث 1' : 'recent post 1'} className="w-23 h-17 object-cover rounded-md flex-shrink-0" />
-                        <div>
-                            <p className="text-sm font-medium">
-                                {isRTL ? 'أهم المشاكل في سيارتك' : 'Most Important Issue For your car.'}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-1">
-                                {isRTL ? '18 فبراير 2019' : '18 Feb 2019'}
-                            </p>
-                        </div>
-                    </div>
-
-
-                    {/* Second post */}
-                    <div className={`flex gap-3 mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <img src={img2} alt={isRTL ? 'منشور حديث 2' : 'recent post 2'} className="w-23 h-17 object-cover rounded-md flex-shrink-0" />
-                        <div>
-                            <p className="text-sm font-medium">
-                                {isRTL ? 'أهم المشاكل في سيارتك' : 'Most Important Issue For your car.'}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-1">
-                                {isRTL ? '18 فبراير 2019' : '18 Feb 2019'}
-                            </p>
-                        </div>
-                    </div>
+                    {recentPosts.length > 0 ? (
+                        recentPosts.map((post) => {
+                             const imageUrl = post.featuredImage?.url || 
+                                              (post.images?.[0]?.url) || 
+                                              'https://via.placeholder.com/150';
+                             return (
+                                <NavLink to={`/blog/${post._id}`} key={post._id} className={`flex gap-3 mb-4 group ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                    <img src={imageUrl} alt={post.title} className="w-23 h-17 w-16 h-12 object-cover rounded-md flex-shrink-0" />
+                                    <div>
+                                        <p className="text-sm font-medium group-hover:text-yellow-500 transition-colors line-clamp-2">
+                                            {post.title}
+                                        </p>
+                                        <p className="text-xs text-gray-400 mt-1">
+                                            {new Date(post.createdAt).toLocaleDateString(isRTL ? 'ar-EG' : 'en-US')}
+                                        </p>
+                                    </div>
+                                </NavLink>
+                             );
+                        })
+                    ) : (
+                        <p className="text-sm text-gray-500">No recent posts</p>
+                    )}
                 </div>
 
-                {/* Third Column: Address (cointain also logos for location ,email and phone) */}
+                {/* Third Column: Address */}
                 <div>
                     <h3 className="text-lg font-semibold text-white mb-4">{t('footer.address')}</h3>
                     <p className="text-sm mb-4">
@@ -97,75 +108,37 @@ const Footer: React.FC = () => {
                         <li className={`flex gap-2 mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                             <FontAwesomeIcon icon={faEnvelope} className="text-yellow-500 mt-1" />
                             <p>
-                                {isRTL ? 'البريد الإلكتروني: info@example.com' : 'Email: info@example.com'}
+                                {isRTL ? 'البريد الإلكتروني: info@autologic.com' : 'Email: info@autologic.com'}
                             </p>
                         </li>
                     </ul>
                 </div>
 
-                {/* Forth Column: Services */}
+                {/* Fourth Column: Services (Dynamic) */}
                 <div>
                     <h3 className="text-lg font-semibold text-white mb-4">{t('footer.services')}</h3>
-                    <ul className="text-sm  list-none">
-                        <li>
-                            <NavLink
-                                to="/engine-repair"
-                                className={`flex items-center gap-2 text-gray-300 hover:text-yellow-500 transition-colors duration-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-                            >
-                                <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                                {isRTL ? 'إصلاح المحرك' : 'Engine Repair'}
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink
-                                to="/tire-replacement"
-                                className={`flex items-center gap-2 text-gray-300 hover:text-yellow-500 transition-colors duration-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-                            >
-                                <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                                {isRTL ? 'استبدال الإطارات' : 'Tire Replacement'}
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink
-                                to="/transmission"
-                                className={`flex items-center gap-2 text-gray-300 hover:text-yellow-500 transition-colors duration-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-                            >
-                                <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                                {isRTL ? 'ناقل الحركة' : 'Transmission'}
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink
-                                to="/diagnostic"
-                                className={`flex items-center gap-2 text-gray-300 hover:text-yellow-500 transition-colors duration-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-                            >
-                                <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                                {isRTL ? 'التشخيص' : 'Diagnostic'}
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink
-                                to="/batteries"
-                                className={`flex items-center gap-2 text-gray-300 hover:text-yellow-500 transition-colors duration-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-                            >
-                                <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                                {isRTL ? 'البطاريات' : 'Batteries'}
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink
-                                to="/brake-repair"
-                                className={`flex items-center gap-2 text-gray-300 hover:text-yellow-500 transition-colors duration-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-                            >
-                                <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                                {isRTL ? 'إصلاح المكابح' : 'Brake Repair'}
-                            </NavLink>
-                        </li>
+                    <ul className="text-sm list-none">
+                        {services.length > 0 ? (
+                            services.map((service) => (
+                                <li key={service._id}>
+                                    <NavLink
+                                        // Navigate to Services page, ideally scroll to or filter (for now just link to page)
+                                        to="/services" 
+                                        className={`flex items-center gap-2 text-gray-300 hover:text-yellow-500 transition-colors duration-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                                    >
+                                        <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                                        {service.name}
+                                    </NavLink>
+                                </li>
+                            ))
+                        ) : (
+                             <li className="text-gray-500">No services available</li>
+                        )}
                     </ul>
                 </div>
             </div>
 
-            {/* bottom line */}
+            {/* Bottom line */}
             <div className="max-w-7xl mx-auto px-6 mt-10 border-t border-gray-700 pt-4 text-sm text-center text-gray-400">
                 © 2025 AutoLogic. {t('footer.rights')}.
             </div>

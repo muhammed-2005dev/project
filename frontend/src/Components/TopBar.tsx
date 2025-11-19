@@ -29,7 +29,7 @@ function TopBar() {
         </div>
 
         {/* Right side with social media icons and language switcher */}
-        <div className="flex items-center gap-4 z-200">
+        <div className="flex items-center gap-4">
           <LanguageSwitcher />
           
           <a

@@ -3,16 +3,19 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import hero1 from "./igor-constantino-aXxu0nVMGmk-unsplash.jpg";
 import hero2 from "./joseph-pillado-n99UTGfbvFQ-unsplash.jpg";
 import hero3 from "./kate-ibragimova-bEGTsOCnHro-unsplash.jpg";
-import { contactAPI } from "../../services/api.js";
+// FIX: Use new API
+import { contactAPI } from "../../services/api";
 
 interface ContactForm {
   name: string;
   email: string;
   phone: string;
-  message: string;
+  message: string; // Removed Subject as it's not in this form design
 }
 
 function Hero() {
@@ -21,6 +24,8 @@ function Hero() {
   const navigate = useNavigate();
   const images = [hero1, hero2, hero3];
   const [current, setCurrent] = useState(0);
+  const [loading, setLoading] = useState(false); // Added loading state
+
   const {
     register,
     handleSubmit,
@@ -36,22 +41,23 @@ function Hero() {
     return () => clearInterval(interval);
   }, []);
 
-  const onSubmit = (data: ContactForm) => {
-    console.log("Contact form data:", data);
-    toast.success(
-      isRTL ? "تم إرسال الرسالة بنجاح" : "Message sent successfully"
-    );
-    // Here you would typically send the data to your backend API
-    sendMessage(data);
-    reset();
-  };
-
-  const sendMessage = (data: ContactForm) => {
+  const onSubmit = async (data: ContactForm) => {
     try {
-      contactAPI.sendMessage(data);
-    } catch (error) {
+      setLoading(true);
+
+      // Call API
+      await contactAPI.sendMessage(data);
+
+      toast.success(
+        isRTL ? "تم إرسال الرسالة بنجاح" : "Message sent successfully"
+      );
+      reset();
+    } catch (error: any) {
       console.error("Error sending message:", error);
-      toast.error("Failed to send message");
+      const msg = error.response?.data?.message || "Failed to send message";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -83,7 +89,7 @@ function Hero() {
           <p className="text-base sm:text-lg mb-6">{t("hero.subtitle")}</p>
           <button
             onClick={handleBookAppointment}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-6 py-3 rounded-md transition"
+            className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-6 py-3 rounded-md transition cursor-pointer"
           >
             {t("hero.button")}
           </button>
@@ -171,9 +177,9 @@ function Hero() {
                 {...register("message", {
                   required: isRTL ? "الرسالة مطلوبة" : "Message is required",
                 })}
-                placeholder={t("contact.message")}
-                rows={4}
-                className={`border border-gray-300 p-4 rounded-md w-full resize-none focus:outline-none focus:border-yellow-500 ${
+                placeholder={t("contact.message", "Message")}
+                rows={3}
+                className={`border border-gray-300 p-3 rounded-md w-full focus:outline-none focus:border-yellow-500 resize-none ${
                   isRTL ? "text-right" : "text-left"
                 }`}
               />
@@ -186,8 +192,12 @@ function Hero() {
 
             <button
               type="submit"
-              className="bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-md font-semibold transition"
+              disabled={loading}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-md font-semibold transition flex justify-center items-center gap-2 cursor-pointer"
             >
+              {loading && (
+                <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+              )}
               {t("contact.send")}
             </button>
           </form>
