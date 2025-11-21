@@ -48,18 +48,24 @@ function Navbar() {
     navigate("/login");
   };
 
-  const isRTL = i18n.language === "ar";
-
   // Helper to check if admin
   const isAdmin = user?.role === "admin";
 
   return (
     <nav
-      className={`w-full bg-white sticky top-0 z-50 shadow-md ${
-        isRTL ? "rtl" : "ltr"
-      }`}
+      className={`w-full bg-white sticky top-0 ${
+        menuOpen ? "z-50" : "z-30"
+      } shadow-md`}
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+        {/* Mobile Menu Button */}
+        <div
+          className="md:hidden text-2xl text-slate-700 cursor-pointer"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          <FontAwesomeIcon icon={menuOpen ? faTimes : faBars} />
+        </div>
+
         {/* Logo - If Admin, click goes to Dashboard. If User, goes to Home */}
         <NavLink
           to={isAdmin ? "/dashboard" : "/"}
@@ -75,11 +81,7 @@ function Navbar() {
         <div className="hidden md:flex items-center gap-8">
           {/* 1. MAIN LINKS - HIDE IF ADMIN */}
           {!isAdmin && (
-            <ul
-              className={`flex gap-6 text-slate-700 font-medium list-none ${
-                isRTL ? "flex-row-reverse" : ""
-              }`}
-            >
+            <ul className="flex gap-6 text-slate-700 font-medium list-none">
               <li>
                 <NavLink
                   to="/"
@@ -219,26 +221,16 @@ function Navbar() {
             )}
           </div>
         </div>
-
-        {/* Mobile Menu Button */}
-        <div
-          className="md:hidden text-2xl text-slate-700 cursor-pointer"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <FontAwesomeIcon icon={menuOpen ? faTimes : faBars} />
-        </div>
       </div>
 
       {/* Mobile Menu Overlay */}
       {menuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50"
+          className="fixed inset-0 bg-black/50"
           onClick={() => setMenuOpen(false)}
         >
           <div
-            className={`absolute ${
-              isRTL ? "left-0" : "right-0"
-            } top-0 w-3/4 sm:w-1/2 bg-white shadow-xl h-full p-6 flex flex-col gap-6 text-slate-700 font-medium overflow-y-auto`}
+            className={`absolute top-0 w-3/4 sm:w-1/2 bg-white shadow-xl h-full p-6 flex flex-col gap-6 text-slate-700 font-medium overflow-y-auto`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4 border-b pb-4">

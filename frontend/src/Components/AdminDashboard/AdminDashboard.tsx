@@ -163,6 +163,40 @@ const AdminDashboard: React.FC = () => {
       },
     ];
 
+    const getBookingStatusColor = (status: string) => {
+      switch (status) {
+        case "pending":
+          return "bg-yellow-100 text-yellow-800";
+        case "confirmed":
+          return "bg-blue-100 text-blue-800";
+        case "in-progress":
+          return "bg-purple-100 text-purple-800";
+        case "completed":
+          return "bg-green-100 text-green-800";
+        case "cancelled":
+          return "bg-red-100 text-red-800";
+        case "no-show":
+          return "bg-gray-100 text-gray-800";
+        default:
+          return "bg-gray-100 text-gray-800";
+      }
+    };
+
+    const getContactStatusColor = (status: string) => {
+      switch (status) {
+        case "new":
+          return "bg-red-100 text-red-800";
+        case "in-progress":
+          return "bg-yellow-100 text-yellow-800";
+        case "resolved":
+          return "bg-green-100 text-green-800";
+        case "closed":
+          return "bg-gray-100 text-gray-800";
+        default:
+          return "bg-gray-100 text-gray-800";
+      }
+    };
+
     return (
       <div className="space-y-6">
         {/* Stats Cards */}
@@ -213,18 +247,11 @@ const AdminDashboard: React.FC = () => {
                     </p>
                   </div>
                   <span
-                    className={`px-2 py-1 rounded-full text-xs ${
-                      booking.status === "completed" ||
-                      booking.status === "confirmed"
-                        ? "bg-green-100 text-green-800"
-                        : booking.status === "pending"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : booking.status === "in-progress"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
+                    className={`px-2 py-1 rounded-full text-xs ${getBookingStatusColor(
+                      booking.status
+                    )}`}
                   >
-                    {booking.status}
+                    {t(`status.${booking.status}`)}
                   </span>
                 </div>
               ))}
@@ -252,15 +279,11 @@ const AdminDashboard: React.FC = () => {
                     <p className="text-sm text-gray-600">{contact.email}</p>
                   </div>
                   <span
-                    className={`px-2 py-1 rounded-full text-xs ${
-                      contact.status === "new"
-                        ? "bg-red-100 text-red-800"
-                        : contact.status === "read"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-green-100 text-green-800"
-                    }`}
+                    className={`px-2 py-1 rounded-full text-xs ${getContactStatusColor(
+                      contact.status
+                    )}`}
                   >
-                    {contact.status}
+                    {t(`status.${contact.status}`)}
                   </span>
                 </div>
               ))}

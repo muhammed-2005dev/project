@@ -22,7 +22,7 @@ function HowItWorks() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
                     <div className="flex flex-col items-center text-center">
                         <img src={step1} alt={isRTL ? 'اختر الخدمة' : 'Choose Service'} className="rounded-md mb-4 w-full object-cover" />
-                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className="flex items-center gap-3">
                             <div className="bg-yellow-500 text-white font-bold text-lg w-8 h-8 flex items-center justify-center rounded-sm">
                                 1
                             </div>
@@ -35,7 +35,7 @@ function HowItWorks() {
                     {/* Step 2 */}
                     <div className="flex flex-col items-center text-center">
                         <img src={step2} alt={isRTL ? 'احجز موعد' : 'Make Appointment'} className="rounded-md mb-4 w-full object-cover" />
-                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className="flex items-center gap-3">
                             <div className="bg-yellow-500 text-white font-bold text-lg w-8 h-8 flex items-center justify-center rounded-sm">
                                 2
                             </div>
@@ -48,7 +48,7 @@ function HowItWorks() {
                     {/* Step 3 */}
                     <div className="flex flex-col items-center text-center">
                         <img src={step3} alt={isRTL ? 'أكد طلبك' : 'Confirm Request'} className="rounded-md mb-4 w-full object-cover" />
-                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className="flex items-center gap-3">
                             <div className="bg-yellow-500 text-white font-bold text-lg w-8 h-8 flex items-center justify-center rounded-sm">
                                 3
                             </div>
@@ -61,7 +61,7 @@ function HowItWorks() {
                     {/* Step 4 */}
                     <div className="flex flex-col items-center text-center">
                         <img src={step4} alt={isRTL ? 'نصلح سيارتك' : 'Pick Your Car'} className="rounded-md mb-4 w-full object-cover" />
-                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className="flex items-center gap-3">
                             <div className="bg-yellow-500 text-white font-bold text-lg w-8 h-8 flex items-center justify-center rounded-sm">
                                 4
                             </div>

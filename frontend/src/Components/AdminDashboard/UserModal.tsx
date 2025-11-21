@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { usersAPI } from "../../services/api";
@@ -17,6 +18,9 @@ const UserModal: React.FC<UserModalProps> = ({
   onSuccess,
   userToEdit,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -79,10 +83,10 @@ const UserModal: React.FC<UserModalProps> = ({
 
       if (userToEdit) {
         await usersAPI.update(userToEdit._id, dataToSend);
-        toast.success("User updated successfully");
+        toast.success(t("modals.user.successUpdate"));
       } else {
         await usersAPI.create(dataToSend);
-        toast.success("User created successfully");
+        toast.success(t("modals.user.successCreate"));
       }
 
       onSuccess();
@@ -98,12 +102,18 @@ const UserModal: React.FC<UserModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div
+        className={`bg-white rounded-lg shadow-xl w-full max-w-md ${
+          isRTL ? "rtl" : "ltr"
+        }`}
+      >
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b">
           <h2 className="text-xl font-bold text-gray-800">
-            {userToEdit ? "Edit User" : "Add New User"}
+            {userToEdit
+              ? t("modals.user.editTitle")
+              : t("modals.user.addTitle")}
           </h2>
           <button
             onClick={onClose}
@@ -118,7 +128,7 @@ const UserModal: React.FC<UserModalProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                First Name
+                {t("modals.user.firstName")}
               </label>
               <input
                 type="text"
@@ -131,7 +141,7 @@ const UserModal: React.FC<UserModalProps> = ({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Last Name
+                {t("modals.user.lastName")}
               </label>
               <input
                 type="text"
@@ -146,7 +156,7 @@ const UserModal: React.FC<UserModalProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Email
+              {t("modals.user.email")}
             </label>
             <input
               type="email"
@@ -160,7 +170,7 @@ const UserModal: React.FC<UserModalProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Phone
+              {t("modals.user.phone")}
             </label>
             <input
               type="text"
@@ -175,7 +185,7 @@ const UserModal: React.FC<UserModalProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Role
+                {t("modals.user.role")}
               </label>
               <select
                 name="role"
@@ -183,15 +193,15 @@ const UserModal: React.FC<UserModalProps> = ({
                 onChange={handleChange}
                 className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 cursor-pointer"
               >
-                <option value="user">User</option>
-                <option value="technician">Technician</option>
-                <option value="admin">Admin</option>
+                <option value="user">{t("role.user")}</option>
+                <option value="technician">{t("role.technician")}</option>
+                <option value="admin">{t("role.admin")}</option>
               </select>
             </div>
 
             {/* Status Checkbox */}
             <div className="flex items-center h-full pt-6">
-              <label className="flex items-center space-x-2 cursor-pointer">
+              <label className="flex items-center space-x-2 cursor-pointer gap-2">
                 <input
                   type="checkbox"
                   name="isActive"
@@ -200,7 +210,7 @@ const UserModal: React.FC<UserModalProps> = ({
                   className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
                 />
                 <span className="text-sm font-medium text-gray-700">
-                  Active Account
+                  {t("modals.user.active")}
                 </span>
               </label>
             </div>
@@ -209,8 +219,8 @@ const UserModal: React.FC<UserModalProps> = ({
           <div>
             <label className="block text-sm font-medium text-gray-700">
               {userToEdit
-                ? "New Password (leave blank to keep current)"
-                : "Password"}
+                ? t("modals.user.newPassword")
+                : t("modals.user.password")}
             </label>
             <input
               type="password"
@@ -232,7 +242,9 @@ const UserModal: React.FC<UserModalProps> = ({
             {loading && (
               <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
             )}
-            {userToEdit ? "Update User" : "Create User"}
+            {userToEdit
+              ? t("modals.user.updateBtn")
+              : t("modals.user.createBtn")}
           </button>
         </form>
       </div>

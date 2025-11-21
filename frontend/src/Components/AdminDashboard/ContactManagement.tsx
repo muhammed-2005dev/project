@@ -109,11 +109,11 @@ const ContactManagement: React.FC = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent cursor-pointer"
           >
-            <option value="">All Statuses</option>
-            <option value="new">New</option>
-            <option value="in-progress">In Progress</option>
-            <option value="resolved">Resolved</option>
-            <option value="closed">Closed</option>
+            <option value="">{t("common.all")}</option>
+            <option value="new">{t("status.new")}</option>
+            <option value="in-progress">{t("status.in-progress")}</option>
+            <option value="resolved">{t("status.resolved")}</option>
+            <option value="closed">{t("status.closed")}</option>
           </select>
         </div>
       </div>
@@ -133,7 +133,7 @@ const ContactManagement: React.FC = () => {
               {/* Sender & Subject */}
               <div className="flex items-center gap-4 min-w-[250px] flex-1">
                 <div
-                  className={`flex-shrink-0 h-12 w-12 rounded-full flex items-center justify-center ${
+                  className={`shrink-0 h-12 w-12 rounded-full flex items-center justify-center ${
                     contact.status === "new"
                       ? "bg-red-50 text-red-500"
                       : "bg-blue-50 text-blue-500"
@@ -163,7 +163,7 @@ const ContactManagement: React.FC = () => {
                     contact.status
                   )}`}
                 >
-                  {contact.status.replace("-", " ")}
+                  {t(`status.${contact.status}`)}
                 </span>
 
                 <div className="flex items-center gap-2">

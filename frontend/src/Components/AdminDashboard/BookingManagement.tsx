@@ -162,7 +162,7 @@ const BookingManagement: React.FC = () => {
   };
 
   const getStatusText = (status: string) => {
-    return status.charAt(0).toUpperCase() + status.slice(1);
+    return t(`status.${status}`);
   };
 
   return (
@@ -207,12 +207,12 @@ const BookingManagement: React.FC = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent cursor-pointer"
           >
             <option value="">{isRTL ? "جميع الحالات" : "All Status"}</option>
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="in-progress">In Progress</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="no-show">No Show</option>
+            <option value="pending">{t("status.pending")}</option>
+            <option value="confirmed">{t("status.confirmed")}</option>
+            <option value="in-progress">{t("status.in-progress")}</option>
+            <option value="completed">{t("status.completed")}</option>
+            <option value="cancelled">{t("status.cancelled")}</option>
+            <option value="no-show">{t("status.no-show")}</option>
           </select>
 
           {/* Date */}
@@ -300,12 +300,12 @@ const BookingManagement: React.FC = () => {
                   }
                   className="w-full text-sm border border-gray-300 rounded-md px-2 py-1 bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
                 >
-                  <option value="pending">Pending</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                  <option value="no-show">No Show</option>
+                  <option value="pending">{t("status.pending")}</option>
+                  <option value="confirmed">{t("status.confirmed")}</option>
+                  <option value="in-progress">{t("status.in-progress")}</option>
+                  <option value="completed">{t("status.completed")}</option>
+                  <option value="cancelled">{t("status.cancelled")}</option>
+                  <option value="no-show">{t("status.no-show")}</option>
                 </select>
               </div>
             </div>

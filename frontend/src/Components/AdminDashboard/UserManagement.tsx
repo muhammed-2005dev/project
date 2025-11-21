@@ -186,19 +186,39 @@ const UserManagement: React.FC = () => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th
+                  className={`px-6 py-3 ${
+                    isRTL ? "text-right" : "text-left"
+                  } text-xs font-medium text-gray-500 uppercase tracking-wider`}
+                >
                   {isRTL ? "المستخدم" : "User"}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th
+                  className={`px-6 py-3 ${
+                    isRTL ? "text-right" : "text-left"
+                  } text-xs font-medium text-gray-500 uppercase tracking-wider`}
+                >
                   {isRTL ? "البريد الإلكتروني" : "Email"}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th
+                  className={`px-6 py-3 ${
+                    isRTL ? "text-right" : "text-left"
+                  } text-xs font-medium text-gray-500 uppercase tracking-wider`}
+                >
                   {isRTL ? "الدور" : "Role"}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th
+                  className={`px-6 py-3 ${
+                    isRTL ? "text-right" : "text-left"
+                  } text-xs font-medium text-gray-500 uppercase tracking-wider`}
+                >
                   {isRTL ? "الحالة" : "Status"}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th
+                  className={`px-6 py-3 ${
+                    isRTL ? "text-right" : "text-left"
+                  } text-xs font-medium text-gray-500 uppercase tracking-wider`}
+                >
                   {isRTL ? "الإجراءات" : "Actions"}
                 </th>
               </tr>
@@ -208,7 +228,7 @@ const UserManagement: React.FC = () => {
                 <tr key={user._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
+                      <div className="shrink-0 h-10 w-10">
                         <div className="h-10 w-10 rounded-full bg-yellow-500 flex items-center justify-center">
                           <FontAwesomeIcon
                             icon={faUser}
@@ -216,7 +236,7 @@ const UserManagement: React.FC = () => {
                           />
                         </div>
                       </div>
-                      <div className="ml-4">
+                      <div className={`${isRTL ? "mr-4" : "ml-4"}`}>
                         <div className="text-sm font-medium text-gray-900">
                           {user.firstName} {user.lastName}
                         </div>
@@ -259,7 +279,7 @@ const UserManagement: React.FC = () => {
                             : "bg-blue-100 text-blue-800"
                         }`}
                       >
-                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                        {t(`role.${user.role}`)}
                       </span>
                     </div>
                   </td>
@@ -272,12 +292,8 @@ const UserManagement: React.FC = () => {
                       }`}
                     >
                       {user.isActive
-                        ? isRTL
-                          ? "نشط"
-                          : "Active"
-                        : isRTL
-                        ? "غير نشط"
-                        : "Inactive"}
+                        ? t("status.active")
+                        : t("status.inactive")}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -308,9 +324,15 @@ const UserManagement: React.FC = () => {
                         }
                         className="text-xs border border-gray-300 rounded px-2 py-1 cursor-pointer"
                       >
-                        <option value="user">User</option>
-                        <option value="technician">Technician</option>
-                        <option value="admin">Admin</option>
+                        <option value="user">
+                          {isRTL ? "مستخدم" : "User"}
+                        </option>
+                        <option value="technician">
+                          {isRTL ? "فني" : "Technician"}
+                        </option>
+                        <option value="admin">
+                          {isRTL ? "مدير" : "Admin"}
+                        </option>
                       </select>
                     </div>
                   </td>

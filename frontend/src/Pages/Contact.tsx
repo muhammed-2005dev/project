@@ -53,26 +53,22 @@ const Contact: React.FC = () => {
     {
       icon: faLocationDot,
       title: t("contact.address"),
-      details: isRTL
-        ? "121 شارع الملك، ملبورن، أستراليا"
-        : "121 King Street, Melbourne, Australia",
+      details: t("topbar.address"),
     },
     {
       icon: faPhone,
-      title: t("contact.phoneNumber"),
-      details: "888 123-4587",
+      title: t("contact.phone"),
+      details: t("contact.phoneNumber"),
     },
     {
       icon: faEnvelope,
-      title: t("contact.emailAddress"),
-      details: "info@autologic.com",
+      title: t("contact.email"),
+      details: t("contact.emailAddress"),
     },
     {
       icon: faClock,
       title: isRTL ? "ساعات العمل" : "Working Hours",
-      details: isRTL
-        ? "الاثنين - الجمعة: 8:00 ص - 6:00 م"
-        : "Monday - Friday: 8:00 AM - 6:00 PM",
+      details: t("topbar.hours"),
     },
   ];
 
@@ -242,7 +238,7 @@ const Contact: React.FC = () => {
                 </div>
               </div>
 
-              {/* Map (Static Placeholder) */}
+              {/* Map (Real Google Map) */}
               <div className="bg-white rounded-lg shadow-lg p-8">
                 <h2
                   className={`text-2xl font-bold text-slate-800 mb-6 ${
@@ -251,10 +247,19 @@ const Contact: React.FC = () => {
                 >
                   {isRTL ? "موقعنا" : "Our Location"}
                 </h2>
-                <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <p className="text-gray-500">
-                    {isRTL ? "خريطة الموقع" : "Site Map"}
-                  </p>
+
+                {/* Map Container */}
+                <div className="w-full h-80 bg-gray-200 rounded-lg overflow-hidden shadow-inner">
+                  <iframe
+                    title="Company Location"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d852.9382610628317!2d29.949155291431286!3d31.227570620295158!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14f5c4eb818bb859%3A0xe4b28ff2fa922b23!2sSkills%20Dynamix!5e0!3m2!1sen!2seg!4v1763665690880!5m2!1sen!2seg"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen={true}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  ></iframe>
                 </div>
               </div>
             </div>

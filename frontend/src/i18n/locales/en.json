@@ -13,8 +13,8 @@
     "appointment": "Make Appointment"
   },
   "topbar": {
-    "hours": "Mon - Tues : 6.00 am - 10.00 pm",
-    "address": "121 King St, Melbourne, Australia"
+    "hours": "Sun - Thu : 8.00 am - 10.00 pm",
+    "address": "431 El Horreya Rd, Roushdy, Alexandria, Egypt"
   },
   "hero": {
     "title": "Professional Car Services",
@@ -59,8 +59,8 @@
     "message": "Message",
     "send": "Send Message",
     "address": "Address",
-    "phoneNumber": "888 123-4587",
-    "emailAddress": "info@example.com",
+    "phoneNumber": "+20 1234567890",
+    "emailAddress": "info@autologic.com",
     "nameRequired": "Name is required",
     "emailRequired": "Email is required",
     "emailInvalid": "Please enter a valid email address",
@@ -70,26 +70,24 @@
   "blog": {
     "title": "Blog",
     "subtitle": "Latest news and tips about cars",
+    "categories": {
+      "all": "All",
+      "maintenance": "Maintenance",
+      "repair": "Repair",
+      "tips": "Tips",
+      "news": "News",
+      "reviews": "Reviews",
+      "guides": "Guides",
+      "other": "Other"
+    },
     "readMore": "Read More",
     "published": "Published on",
     "author": "By",
     "backToBlog": "Back to Blog",
-    "like": "Like",
-    "share": "Share",
-    "relatedPosts": "Related Posts",
     "newsletter": "Subscribe to Newsletter",
     "newsletterText": "Get the latest articles and tips directly in your email",
     "emailPlaceholder": "Enter your email",
     "subscribe": "Subscribe"
-  },
-  "pricing": {
-    "title": "Our Pricing",
-    "subtitle": "Competitive pricing plans for all services",
-    "basic": "Basic",
-    "premium": "Premium",
-    "deluxe": "Deluxe",
-    "monthly": "Monthly",
-    "choose": "Choose Plan"
   },
   "login": {
     "title": "Login",
@@ -115,25 +113,58 @@
   "appointment": {
     "title": "Make Appointment",
     "subtitle": "Book your appointment with us",
+    "bookingInfo": "Booking Information",
     "service": "Service",
+    "selectServiceError": "Please select a service",
+    "chooseService": "Choose the required service",
+    "vehicleDetails": "Vehicle Details",
+    "make": "Make",
+    "model": "Model",
+    "year": "Year",
     "date": "Date",
+    "chooseDate": "Choose date",
     "time": "Time",
+    "chooseTime": "Choose time",
+    "selectTimeError": "Please select a time",
+    "selectDateFirst": "Select a date first to see available times",
+    "issueDescription": "Issue Description",
+    "describeProblem": "Describe the problem with your car...",
+    "book": "Book Appointment",
+    "yourInfo": "Your Information",
+    "shopContact": "Shop Contact Info",
     "name": "Name",
-    "phone": "Phone",
     "email": "Email",
-    "message": "Additional Message",
-    "book": "Book Appointment"
+    "phone": "Phone"
   },
   "dashboard": {
     "title": "Dashboard",
+    "userTitle": "User Dashboard",
     "welcome": "Welcome",
     "overview": "Overview",
     "services": "Services",
-    "projects": "Projects",
     "bookings": "Bookings",
-    "reviews": "Reviews",
-    "settings": "Settings",
+    "users": "Users",
+    "contacts": "Contacts",
+    "myBookings": "My Bookings",
+    "myProfile": "My Profile",
     "logout": "Logout"
+  },
+  "profile": {
+    "personalInfo": "Personal Information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "emailHint": "(Cannot be changed)",
+    "phone": "Phone",
+    "updateBtn": "Update Profile",
+    "changePassword": "Change Password",
+    "currentPass": "Current Password",
+    "newPass": "New Password",
+    "confirmPass": "Confirm New Password",
+    "changePassBtn": "Change Password",
+    "passMismatch": "Passwords do not match",
+    "successUpdate": "Profile updated successfully",
+    "successPass": "Password changed successfully"
   },
   "footer": {
     "description": "Simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever.",
@@ -163,6 +194,93 @@
     "search": "Search",
     "filter": "Filter",
     "sort": "Sort",
-    "language": "Language"
+    "language": "Language",
+    "all": "All",
+    "at": "at"
+  },
+  "status": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "in-progress": "In Progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "no-show": "No Show",
+    "new": "New",
+    "read": "Read",
+    "resolved": "Resolved",
+    "closed": "Closed",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "role": {
+    "user": "User",
+    "admin": "Admin",
+    "technician": "Technician"
+  },
+  "modals": {
+    "user": {
+      "addTitle": "Add New User",
+      "editTitle": "Edit User",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "password": "Password",
+      "newPassword": "New Password (leave blank to keep)",
+      "role": "Role",
+      "active": "Active Account",
+      "createBtn": "Create User",
+      "updateBtn": "Update User",
+      "successCreate": "User created successfully",
+      "successUpdate": "User updated successfully"
+    },
+    "service": {
+      "addTitle": "Add New Service",
+      "editTitle": "Edit Service",
+      "image": "Service Image",
+      "clickToUpload": "Click to upload image",
+      "name": "Service Name",
+      "category": "Category",
+      "categories": {
+        "engine": "Engine",
+        "transmission": "Transmission",
+        "brakes": "Brakes",
+        "tires": "Tires",
+        "electrical": "Electrical",
+        "ac": "AC",
+        "diagnostic": "Diagnostic",
+        "oil": "Oil",
+        "other": "Other"
+      },
+      "price": "Price ($)",
+      "duration": "Duration (mins)",
+      "description": "Description",
+      "createBtn": "Create Service",
+      "updateBtn": "Update Service",
+      "successCreate": "Service created successfully",
+      "successUpdate": "Service updated successfully"
+    },
+    "booking": {
+      "title": "Booking Details",
+      "customerInfo": "Customer Info",
+      "serviceDetails": "Service Details",
+      "vehicleInfo": "Vehicle Information",
+      "make": "Make",
+      "model": "Model",
+      "year": "Year",
+      "issue": "Issue Description",
+      "assignTech": "Assign Technician",
+      "selectTech": "Select a Technician",
+      "assignBtn": "Assign",
+      "successAssign": "Technician assigned successfully"
+    },
+    "contact": {
+      "title": "Message Details",
+      "subject": "Subject",
+      "type": "Type",
+      "message": "Message",
+      "updateStatus": "Update Status",
+      "successStatus": "Status updated successfully"
+    }
   }
 }

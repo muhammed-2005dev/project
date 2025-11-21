@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTimes,
@@ -12,7 +13,7 @@ interface ServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  serviceToEdit?: any; // If provided, we are in "Edit" mode
+  serviceToEdit?: any;
 }
 
 const ServiceModal: React.FC<ServiceModalProps> = ({
@@ -21,6 +22,9 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
   onSuccess,
   serviceToEdit,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -33,15 +37,15 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const categories = [
-    "Engine",
-    "Transmission",
-    "Brakes",
-    "Tires",
-    "Electrical",
-    "AC",
-    "Diagnostic",
-    "Oil",
-    "Other",
+    "engine",
+    "transmission",
+    "brakes",
+    "tires",
+    "electrical",
+    "ac",
+    "diagnostic",
+    "oil",
+    "other",
   ];
 
   // Reset or Populate form when opening
@@ -95,7 +99,6 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
     setLoading(true);
 
     try {
-      // 1. Create FormData object (Required for file uploads)
       const data = new FormData();
       data.append("name", formData.name);
       data.append("description", formData.description);
@@ -103,23 +106,20 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
       data.append("duration", formData.duration);
       data.append("category", formData.category);
 
-      // 2. Append file if user selected one
       if (imageFile) {
-        // Note: The key 'files' matches what backend/utils/cloudinary.js expects
         data.append("files", imageFile);
       }
 
-      // 3. Send Request
       if (serviceToEdit) {
         await servicesAPI.update(serviceToEdit._id, data);
-        toast.success("Service updated successfully");
+        toast.success(t("modals.service.successUpdate"));
       } else {
         await servicesAPI.create(data);
-        toast.success("Service created successfully");
+        toast.success(t("modals.service.successCreate"));
       }
 
-      onSuccess(); // Refresh parent list
-      onClose(); // Close modal
+      onSuccess();
+      onClose();
     } catch (error: any) {
       console.error(error);
       toast.error(error.response?.data?.message || "Failed to save service");
@@ -131,12 +131,18 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div
+        className={`bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto ${
+          isRTL ? "rtl" : "ltr"
+        }`}
+      >
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b">
           <h2 className="text-xl font-bold text-gray-800">
-            {serviceToEdit ? "Edit Service" : "Add New Service"}
+            {serviceToEdit
+              ? t("modals.service.editTitle")
+              : t("modals.service.addTitle")}
           </h2>
           <button
             onClick={onClose}
@@ -151,9 +157,9 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
           {/* Image Upload */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
-              Service Image
+              {t("modals.service.image")}
             </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-yellow-500 transition-colors relative">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-yellow-500 transition-colors relative cursor-pointer">
               {previewUrl ? (
                 <img
                   src={previewUrl}
@@ -163,7 +169,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
               ) : (
                 <div className="text-gray-400">
                   <FontAwesomeIcon icon={faUpload} className="text-2xl mb-2" />
-                  <p className="text-sm">Click to upload image</p>
+                  <p className="text-sm">{t("modals.service.clickToUpload")}</p>
                 </div>
               )}
               <input
@@ -178,7 +184,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
           {/* Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Service Name
+              {t("modals.service.name")}
             </label>
             <input
               type="text"
@@ -193,7 +199,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
           {/* Category */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Category
+              {t("modals.service.category")}
             </label>
             <select
               name="category"
@@ -202,8 +208,8 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
               className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent cursor-pointer"
             >
               {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
+                <option key={cat} value={cat.charAt(0).toUpperCase() + cat.slice(1)}>
+                  {t(`modals.service.categories.${cat}`)}
                 </option>
               ))}
             </select>
@@ -213,7 +219,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Price ($)
+                {t("modals.service.price")}
               </label>
               <input
                 type="number"
@@ -227,7 +233,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Duration (mins)
+                {t("modals.service.duration")}
               </label>
               <input
                 type="number"
@@ -244,7 +250,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Description
+              {t("modals.service.description")}
             </label>
             <textarea
               name="description"
@@ -265,7 +271,9 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
             {loading && (
               <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
             )}
-            {serviceToEdit ? "Update Service" : "Create Service"}
+            {serviceToEdit
+              ? t("modals.service.updateBtn")
+              : t("modals.service.createBtn")}
           </button>
         </form>
       </div>

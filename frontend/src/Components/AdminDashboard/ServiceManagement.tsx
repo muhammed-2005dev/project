@@ -125,15 +125,15 @@ const ServiceManagement: React.FC = () => {
   });
 
   const categories = [
-    "Engine",
-    "Transmission",
-    "Brakes",
-    "Tires",
-    "Electrical",
-    "AC",
-    "Diagnostic",
-    "Oil",
-    "Other",
+    "engine",
+    "transmission",
+    "brakes",
+    "tires",
+    "electrical",
+    "ac",
+    "diagnostic",
+    "oil",
+    "other",
   ];
 
   if (loading) {
@@ -190,8 +190,11 @@ const ServiceManagement: React.FC = () => {
           >
             <option value="">{isRTL ? "جميع الفئات" : "All Categories"}</option>
             {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
+              <option
+                key={category}
+                value={category.charAt(0).toUpperCase() + category.slice(1)}
+              >
+                {t(`modals.service.categories.${category}`)}
               </option>
             ))}
           </select>
@@ -211,7 +214,10 @@ const ServiceManagement: React.FC = () => {
       {/* Services Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredServices.map((service) => (
-          <div key={service._id} className="bg-white flex flex-col justify-between rounded-lg shadow-lg p-6">
+          <div
+            key={service._id}
+            className="bg-white flex flex-col justify-between rounded-lg shadow-lg p-6"
+          >
             <div>
               {service.images && service.images.length > 0 && (
                 <div className="mb-4">

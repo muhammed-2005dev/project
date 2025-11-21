@@ -86,11 +86,7 @@ const BlogSingle: React.FC = () => {
       {/* Breadcrumb */}
       <div className="bg-white border-b py-4">
         <div className="max-w-4xl mx-auto px-6">
-          <nav
-            className={`flex items-center gap-2 text-sm text-gray-600 ${
-              isRTL ? "flex-row-reverse" : ""
-            }`}
-          >
+          <nav className="flex items-center gap-2 text-sm text-gray-600">
             <NavLink to="/" className="hover:text-yellow-600">
               {t("nav.home")}
             </NavLink>
@@ -147,11 +143,7 @@ const BlogSingle: React.FC = () => {
                   </div>
 
                   {/* Article Actions */}
-                  <div
-                    className={`flex items-center justify-between mt-8 pt-6 border-t ${
-                      isRTL ? "flex-row-reverse" : ""
-                    }`}
-                  >
+                  <div className="flex items-center justify-between mt-8 pt-6 border-t">
                     <NavLink
                       to="/blog"
                       className="flex items-center gap-2 text-yellow-600 hover:text-yellow-700 font-medium"
@@ -185,7 +177,7 @@ const BlogSingle: React.FC = () => {
                   <input
                     type="email"
                     placeholder={t("blog.emailPlaceholder")}
-                    className={`w-full px-4 py-2 rounded-lg text-slate-300 focus:ring-2 focus:ring-yellow-500 focus:outline-none ${
+                    className={`w-full px-4 py-2 rounded-lg text-slate-300 border-2 border-slate-300 focus:border-yellow-500 focus:outline-none ${
                       isRTL ? "text-right" : "text-left"
                     }`}
                   />

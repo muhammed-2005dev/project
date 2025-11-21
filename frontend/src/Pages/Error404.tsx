@@ -37,7 +37,7 @@ const Error404: React.FC = () => {
           
           <button
             onClick={() => window.history.back()}
-            className="border border-slate-300 text-slate-700 px-8 py-3 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+            className="border border-slate-300 text-slate-700 px-8 py-3 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 cursor-pointer"
           >
             <FontAwesomeIcon icon={faArrowLeft} />
             {t('error.goBack')}
@@ -50,7 +50,7 @@ const Error404: React.FC = () => {
           <p className="text-gray-600 mb-4">
             {t('error.helpText')}
           </p>
-          <div className={`flex flex-col sm:flex-row gap-4 justify-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <NavLink
               to="/services"
               className="text-yellow-600 hover:text-yellow-700 font-medium"

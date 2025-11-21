@@ -47,7 +47,6 @@ const MakeAppointment: React.FC = () => {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<AppointmentForm>();
 
@@ -67,7 +66,7 @@ const MakeAppointment: React.FC = () => {
     };
 
     checkAuthAndLoad();
-  }, []); // Empty dependency array stops the loop
+  }, []);
 
   // 2. Fetch Services
   const loadServices = async () => {
@@ -115,7 +114,7 @@ const MakeAppointment: React.FC = () => {
 
   const onSubmit = async (data: AppointmentForm) => {
     if (!selectedDate) {
-      toast.error(isRTL ? "يرجى اختيار التاريخ" : "Please select a date");
+      toast.error(t("appointment.selectDateFirst")); // Using translation
       return;
     }
 
@@ -139,10 +138,8 @@ const MakeAppointment: React.FC = () => {
 
       await bookingsAPI.create(payload);
 
-      toast.success(
-        isRTL ? "تم حجز الموعد بنجاح" : "Appointment booked successfully"
-      );
-      navigate("/dashboard"); // Send them to their dashboard to see the booking
+      toast.success(t("common.success") || "Appointment booked successfully");
+      navigate("/dashboard");
     } catch (error: any) {
       console.error(error);
       const msg = error.response?.data?.message || "Failed to create booking";
@@ -179,7 +176,7 @@ const MakeAppointment: React.FC = () => {
                     isRTL ? "text-right" : "text-left"
                   }`}
                 >
-                  {isRTL ? "معلومات الحجز" : "Booking Information"}
+                  {t("appointment.bookingInfo")}
                 </h2>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -191,19 +188,15 @@ const MakeAppointment: React.FC = () => {
                     </label>
                     <select
                       {...register("service", {
-                        required: isRTL
-                          ? "يرجى اختيار الخدمة"
-                          : "Please select a service",
+                        required:
+                          t("appointment.selectServiceError") ||
+                          "Please select a service",
                       })}
                       className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
                         isRTL ? "text-right" : "text-left"
                       } cursor-pointer`}
                     >
-                      <option value="">
-                        {isRTL
-                          ? "اختر الخدمة المطلوبة"
-                          : "Choose the required service"}
-                      </option>
+                      <option value="">{t("appointment.chooseService")}</option>
                       {services.map((service) => (
                         <option key={service._id} value={service._id}>
                           {service.name} (${service.price})
@@ -217,21 +210,24 @@ const MakeAppointment: React.FC = () => {
                     )}
                   </div>
 
-                  {/* 2. Car Information (New Section) */}
+                  {/* 2. Car Information */}
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h3 className="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                      <FontAwesomeIcon icon={faCar} /> Vehicle Details
+                      <FontAwesomeIcon icon={faCar} />{" "}
+                      {t("appointment.vehicleDetails")}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <label className="block text-xs text-gray-500 uppercase mb-1">
-                          Make
+                          {t("appointment.make")}
                         </label>
                         <input
                           type="text"
-                          placeholder="e.g. Toyota"
+                          placeholder={isRTL ? "مثال: تويوتا" : "e.g. Toyota"}
                           {...register("carMake", {
-                            required: "Make is required",
+                            required: isRTL
+                              ? "الشركة مطلوبة"
+                              : "Make is required",
                           })}
                           className="w-full px-3 py-2 border rounded-lg text-sm"
                         />
@@ -243,13 +239,15 @@ const MakeAppointment: React.FC = () => {
                       </div>
                       <div>
                         <label className="block text-xs text-gray-500 uppercase mb-1">
-                          Model
+                          {t("appointment.model")}
                         </label>
                         <input
                           type="text"
-                          placeholder="e.g. Corolla"
+                          placeholder={isRTL ? "مثال: كورولا" : "e.g. Corolla"}
                           {...register("carModel", {
-                            required: "Model is required",
+                            required: isRTL
+                              ? "الموديل مطلوب"
+                              : "Model is required",
                           })}
                           className="w-full px-3 py-2 border rounded-lg text-sm"
                         />
@@ -261,13 +259,15 @@ const MakeAppointment: React.FC = () => {
                       </div>
                       <div>
                         <label className="block text-xs text-gray-500 uppercase mb-1">
-                          Year
+                          {t("appointment.year")}
                         </label>
                         <input
                           type="number"
                           placeholder="2020"
                           {...register("carYear", {
-                            required: "Year is required",
+                            required: isRTL
+                              ? "السنة مطلوبة"
+                              : "Year is required",
                             min: { value: 1900, message: "Invalid year" },
                             max: {
                               value: new Date().getFullYear() + 1,
@@ -303,7 +303,7 @@ const MakeAppointment: React.FC = () => {
                         className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
                           isRTL ? "text-right" : "text-left"
                         }`}
-                        placeholderText={isRTL ? "اختر التاريخ" : "Choose date"}
+                        placeholderText={t("appointment.chooseDate")}
                         wrapperClassName="w-full"
                       />
                     </div>
@@ -321,18 +321,14 @@ const MakeAppointment: React.FC = () => {
                       </label>
                       <select
                         {...register("appointmentTime", {
-                          required: isRTL
-                            ? "يرجى اختيار الوقت"
-                            : "Please select a time",
+                          required: t("appointment.selectTimeError"),
                         })}
                         disabled={!selectedDate || slotsLoading}
                         className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent disabled:bg-gray-100 ${
                           isRTL ? "text-right" : "text-left"
                         } cursor-pointer`}
                       >
-                        <option value="">
-                          {isRTL ? "اختر الوقت" : "Choose time"}
-                        </option>
+                        <option value="">{t("appointment.chooseTime")}</option>
                         {timeSlots.map((time, index) => (
                           <option key={index} value={time}>
                             {time}
@@ -346,7 +342,7 @@ const MakeAppointment: React.FC = () => {
                       )}
                       {!selectedDate && (
                         <p className="text-xs text-gray-500 mt-1">
-                          Select a date first to see available times.
+                          {t("appointment.selectDateFirst")}
                         </p>
                       )}
                     </div>
@@ -355,17 +351,19 @@ const MakeAppointment: React.FC = () => {
                   {/* 4. Issue Description */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {t("appointment.message")} / Issue Description
+                      {t("appointment.issueDescription")}
                     </label>
                     <textarea
                       {...register("description", {
-                        required: "Description is required",
+                        required: isRTL
+                          ? "وصف المشكلة مطلوب"
+                          : "Description is required",
                       })}
                       rows={4}
                       className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
                         isRTL ? "text-right" : "text-left"
                       }`}
-                      placeholder="Describe the problem with your car..."
+                      placeholder={t("appointment.describeProblem")}
                     />
                     {errors.description && (
                       <p className="text-red-500 text-sm mt-1">
@@ -396,23 +394,29 @@ const MakeAppointment: React.FC = () => {
               {/* Logged In User Info */}
               <div className="bg-blue-50 border border-blue-100 rounded-lg p-6">
                 <h3 className="text-lg font-bold text-blue-800 mb-4 flex items-center gap-2">
-                  <FontAwesomeIcon icon={faUser} /> Your Information
+                  <FontAwesomeIcon icon={faUser} /> {t("appointment.yourInfo")}
                 </h3>
                 <div className="space-y-3 text-sm">
                   <p className="flex justify-between border-b border-blue-100 pb-2">
-                    <span className="text-blue-600">Name:</span>
+                    <span className="text-blue-600">
+                      {t("appointment.name")}:
+                    </span>
                     <span className="font-medium text-slate-700">
                       {user?.firstName} {user?.lastName}
                     </span>
                   </p>
                   <p className="flex justify-between border-b border-blue-100 pb-2">
-                    <span className="text-blue-600">Email:</span>
+                    <span className="text-blue-600">
+                      {t("appointment.email")}:
+                    </span>
                     <span className="font-medium text-slate-700">
                       {user?.email}
                     </span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="text-blue-600">Phone:</span>
+                    <span className="text-blue-600">
+                      {t("appointment.phone")}:
+                    </span>
                     <span className="font-medium text-slate-700">
                       {user?.phone || "N/A"}
                     </span>
@@ -427,7 +431,7 @@ const MakeAppointment: React.FC = () => {
                     isRTL ? "text-right" : "text-left"
                   }`}
                 >
-                  {isRTL ? "معلومات الاتصال" : "Shop Contact Info"}
+                  {t("appointment.shopContact")}
                 </h3>
                 <div className="space-y-3">
                   <div
@@ -439,7 +443,7 @@ const MakeAppointment: React.FC = () => {
                       icon={faPhone}
                       className="text-yellow-500"
                     />
-                    <span className="text-gray-700">888 123-4587</span>
+                    <span className="text-gray-700">{t("contact.phoneNumber")}</span>
                   </div>
                   <div
                     className={`flex items-center gap-3 ${
@@ -450,7 +454,7 @@ const MakeAppointment: React.FC = () => {
                       icon={faEnvelope}
                       className="text-yellow-500"
                     />
-                    <span className="text-gray-700">info@autologic.com</span>
+                    <span className="text-gray-700">{t("contact.emailAddress")}</span>
                   </div>
                   <div
                     className={`flex items-center gap-3 ${
@@ -462,9 +466,7 @@ const MakeAppointment: React.FC = () => {
                       className="text-yellow-500"
                     />
                     <span className="text-gray-700">
-                      {isRTL
-                        ? "الاثنين - الجمعة: 8:00 ص - 6:00 م"
-                        : "Mon - Fri: 8:00 AM - 6:00 PM"}
+                      {t("topbar.hours")}
                     </span>
                   </div>
                 </div>

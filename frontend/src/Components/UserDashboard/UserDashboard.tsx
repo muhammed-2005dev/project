@@ -1,39 +1,51 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCalendarAlt,
   faUser,
   faSignOutAlt,
 } from "@fortawesome/free-solid-svg-icons";
-import UserBookings from "./UserBookings";
-import UserProfile from "./UserProfile";
+import UserBookings from "../../Components/UserDashboard/UserBookings";
+import UserProfile from "../../Components/UserDashboard/UserProfile";
 
 const UserDashboard: React.FC = () => {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+  const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState("bookings");
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  // Safe parsing of user data
+  const userJson = localStorage.getItem("user");
+  const user = userJson ? JSON.parse(userJson) : { firstName: "User" };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen bg-gray-50 ${isRTL ? "rtl" : "ltr"}`}>
       {/* Navbar / Header */}
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800">User Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-800">
+            {t("dashboard.userTitle")}
+          </h1>
           <div className="flex items-center gap-4">
             <span className="text-gray-600">
-              Welcome, <span className="font-semibold">{user.firstName}</span>
+              {t("dashboard.welcome")},{" "}
+              <span className="font-semibold">{user.firstName}</span>
             </span>
             <button
               onClick={handleLogout}
               className="text-red-600 hover:text-red-800 flex items-center gap-2 cursor-pointer"
             >
               <FontAwesomeIcon icon={faSignOutAlt} />
-              Logout
+              {t("dashboard.logout")}
             </button>
           </div>
         </div>
@@ -46,25 +58,34 @@ const UserDashboard: React.FC = () => {
             <div className="bg-white rounded-lg shadow overflow-hidden">
               <button
                 onClick={() => setActiveTab("bookings")}
-                className={`w-full flex items-center gap-3 px-6 py-4 text-left transition-colors ${
+                className={`w-full flex items-center gap-3 px-6 py-4 transition-colors cursor-pointer ${
+                  isRTL ? "text-right flex-row-reverse" : "text-left"
+                } ${
                   activeTab === "bookings"
-                    ? "bg-yellow-50 text-yellow-600 border-l-4 border-yellow-500"
+                    ? `bg-yellow-50 text-yellow-600 ${
+                        isRTL ? "border-r-4" : "border-l-4"
+                      } border-yellow-500`
                     : "text-gray-600 hover:bg-gray-50"
-                } cursor-pointer`}
+                }`}
               >
                 <FontAwesomeIcon icon={faCalendarAlt} />
-                My Bookings
+                <span className="flex-1">{t("dashboard.myBookings")}</span>
               </button>
+
               <button
                 onClick={() => setActiveTab("profile")}
-                className={`w-full flex items-center gap-3 px-6 py-4 text-left transition-colors ${
+                className={`w-full flex items-center gap-3 px-6 py-4 transition-colors cursor-pointer ${
+                  isRTL ? "text-right flex-row-reverse" : "text-left"
+                } ${
                   activeTab === "profile"
-                    ? "bg-yellow-50 text-yellow-600 border-l-4 border-yellow-500"
+                    ? `bg-yellow-50 text-yellow-600 ${
+                        isRTL ? "border-r-4" : "border-l-4"
+                      } border-yellow-500`
                     : "text-gray-600 hover:bg-gray-50"
-                } cursor-pointer`}
+                }`}
               >
                 <FontAwesomeIcon icon={faUser} />
-                My Profile
+                <span className="flex-1">{t("dashboard.myProfile")}</span>
               </button>
             </div>
           </div>

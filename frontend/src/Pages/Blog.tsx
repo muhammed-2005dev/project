@@ -94,7 +94,7 @@ const Blog: React.FC = () => {
       </div>
 
       {/* Categories Filter */}
-      <div className="py-8 bg-white border-b sticky top-[80px] z-10">
+      <div className="py-8 bg-white border-b">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-wrap gap-4 justify-center">
             {categories.map((category) => (
@@ -107,7 +107,7 @@ const Blog: React.FC = () => {
                     : "bg-gray-100 text-gray-700 hover:bg-yellow-500 hover:text-white"
                 } cursor-pointer`}
               >
-                {category}
+                {t(`blog.categories.${category.toLowerCase()}`)}
               </button>
             ))}
           </div>
@@ -222,7 +222,7 @@ const Blog: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={isRTL ? "أدخل بريدك الإلكتروني" : "Enter your email"}
-              className="flex-1 px-4 py-3 rounded-lg text-slate-300 focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+              className="flex-1 px-4 py-3 rounded-lg text-slate-300 ring-2 focus:ring-yellow-500 focus:outline-none"
               required
             />
             <button
